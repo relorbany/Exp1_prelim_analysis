@@ -5,8 +5,8 @@ A [workflowr][] project.
 [workflowr]: https://github.com/jdblischak/workflowr
 
 
-1. Get data on Midway, each fastq pair (Read1+Read2) in its own directory
-2. Run Drop-seq alignment pipeline
+1. Get data on Midway, with each fastq pair (Read1+Read2) in its own directory.
+2. Run Drop-seq alignment pipeline. Change proj_dir to directory with fastq files, and cell_num as needed. (What I've written below points to Seb's pipeline in his directory. I've also copied these files into /project2/gilad/reem/singlecellCM/scripts/dropseq_pipeline_V2018-07-02/ but haven't changed them to point away from Seb's files yet)
 
 sbatch --partition=gilad /project2/gilad/spott/Pipelines/dropseq_pipeline/Version-2018-07-02/snakemake.batch \
 "-s /project2/gilad/spott/Pipelines/dropseq_pipeline/Version-2018-07-02/Snakefile_fixed_new" \
@@ -14,16 +14,8 @@ sbatch --partition=gilad /project2/gilad/spott/Pipelines/dropseq_pipeline/Versio
 "--config cell_num=5000" \
 "--config proj_dir=/dir/to/data/"
 
-3. Make sure bam files in the CB_UMI_tag directory are sorted in the same way as vcf
+3. Make sure bam files in the CB_UMI_tag directory are sorted in the same way as vcf file. /project2/gilad/reem/singlecellCM/scripts/run_sortbams.sh
 
-sbatch --partition=gilad --wrap="java -jar $PICARD ReorderSam I=YG-RE1-Drop-CD1col1_S1_assigned_sorted_CB_UMI_tags.bam O=reordered_CD1col1_assigned_sorted_CBUMItags.bam R=/project2/gilad/reem/geno_38/hg38.fa.gz CREATE_INDEX=TRUE"
+4. Run demuxlet to identify which individual each cell comes from. /project2/gilad/reem/singlecellCM/scripts/rundemuxlet.sh
 
-4. Run demuxlet to identify which individual each cell comes from
-
-sbatch --partition=gilad --wrap="bash /project2/gilad/reem/singlecellCM/rundemuxlet.sh"
-
-5. Load and run rstudio on Midway to start using Seurat
-
-module load rstudio
-rstudio
-
+5. Load and run rstudio module on Midway to use Seurat package.
