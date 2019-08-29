@@ -1,7 +1,7 @@
-name: "Exp1_prelim_analysis"
+name: Exp1_prelim_analysis
 output_dir: ../docs
 navbar:
-  title: "Exp1_prelim_analysis"
+  title: Exp1_prelim_analysis
   left:
   - text: Home
     href: index.html
@@ -9,6 +9,10 @@ navbar:
     href: about.html
   - text: License
     href: license.html
+  right:
+  - icon: fa-github
+    text: Source code
+    href: https://github.com/relorbany/Exp1_prelim_analysis
 output:
   workflowr::wflow_html:
     toc: yes
