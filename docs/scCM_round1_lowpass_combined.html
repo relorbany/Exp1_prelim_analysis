@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>scCM_round1_lowpass_combined</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Exp1_prelim_analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">scCM_round1_lowpass_combined</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-08-28
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>Exp1_prelim_analysis/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div class="panel-group" id="workflowr-checks">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongobjectspresent"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Environment:</strong> objects present </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongobjectspresent" class="panel-collapse collapse">
+<div class="panel-body">
+
+<p>
+The global environment had objects present when the code in the R Markdown file was run. These objects can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment. Use <code>wflow_publish</code> or <code>wflow_build</code> to ensure that the code is always run in an empty environment.
+</p>
+<p>
+The following objects were defined in the global environment when these results were created:
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+Name
+</th>
+<th style="text-align:left;">
+Class
+</th>
+<th style="text-align:left;">
+Size
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+data
+</td>
+<td style="text-align:left;">
+environment
+</td>
+<td style="text-align:left;">
+56 bytes
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+env
+</td>
+<td style="text-align:left;">
+environment
+</td>
+<td style="text-align:left;">
+56 bytes
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20190828code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20190828)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20190828code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20190828)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongb1fbf6e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> b1fbf6e </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongb1fbf6e" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    docs/figure/
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+b1fbf6e
+</td>
+<td>
+Reem Elorbany
+</td>
+<td>
+2019-08-29
+</td>
+<td>
+Adding initial workflowr files
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>My goal is to combine all 18 collections into a single Seurat object. First, I need to read in the raw data for all collections.</p>
+<pre class="r"><code>rawdata_C1c1 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col1/output/dge_data/YG-RE1-Drop-CD1col1_S1_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c2 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col2/output/dge_data/YG-RE1-Drop-CD1col2_S2_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c3 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col3/output/dge_data/YG-RE1-Drop-CD1col3_S3_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c4 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col4/output/dge_data/YG-RE2-Drop-CD1col4_S1_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c5 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col5/output/dge_data/YG-RE2-Drop-CD1col5_S2_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c6 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col6/output/dge_data/YG-RE2-Drop-CD1col6_S3_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+
+rawdata_C2c1 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col1/output/dge_data/YG-RE1-Drop-CD2col1_S4_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c2 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col2/output/dge_data/YG-RE2-Drop-CD2col2_S4_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c3 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col3/output/dge_data/YG-RE2-Drop-CD2col3_S5_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c4 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col4/output/dge_data/YG-RE1-Drop-CD2col4_S5_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c5 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col5/output/dge_data/YG-RE2-Drop-CD2col5_S6_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c6 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col6/output/dge_data/YG-RE1-Drop-CD2col6_S6_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+
+rawdata_C3c1 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col1/output/dge_data/YG-RE2-Drop-CD3col1_S7_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c2 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col2/output/dge_data/YG-RE2-Drop-CD3col2_S8_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c3 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col3/output/dge_data/YG-RE1-Drop-CD3col3_S7_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c4 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col4/output/dge_data/YG-RE1-Drop-CD3col4_S8_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c5 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col5/output/dge_data/YG-RE1-Drop-CD3col5_S9_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c6 &lt;- read.table(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col6/output/dge_data/YG-RE2-Drop-CD3col6_S9_gene_counts.tsv.gz&quot;,header=T, stringsAsFactors = F, row.names=1)</code></pre>
+<p>Next, I convert Ensembl gene numbers to gene names/symbols to make it more readable. To do that, first I need to get the matched Ensembl IDs and gene symbols through biomart.</p>
+<pre class="r"><code># get data from biomart
+ensembl = useEnsembl(biomart=&quot;ensembl&quot;, dataset=&quot;hsapiens_gene_ensembl&quot;)
+geneinfo &lt;- getBM(attributes = c(&quot;ensembl_gene_id&quot;,&quot;hgnc_symbol&quot;),mart=ensembl)
+
+for (i in 1:3) {
+  for (j in 1:6) {
+    # read in every raw data matrix
+    raw_dat_temp &lt;- eval(as.name(paste0(&quot;rawdata_C&quot;,i,&quot;c&quot;,j)))
+    
+    # remove the version numbers from those gene IDs 
+    gene_id_temp &lt;-
+           str_replace(rownames(raw_dat_temp),
+                       pattern = &quot;.[0-9]+$&quot;, replacement=&quot;&quot;)
+    # and subset to only those genes from the full list of genes
+    mygeneinfo_temp &lt;- geneinfo[geneinfo$ensembl_gene_id %in% gene_id_temp,]
+   
+    # make a temporary raw data matrix with the non-version gene IDs
+    bm_rawdat_temp &lt;- raw_dat_temp
+    rownames(bm_rawdat_temp) &lt;- gene_id_temp
+    # subset temp raw data matrix to only the ones with info on biomart
+    bm_rawdat_temp &lt;- bm_rawdat_temp[rownames(bm_rawdat_temp) %in% mygeneinfo_temp$ensembl_gene_id,]
+    
+    # get all the index numbers for a gene list sorted by number
+mygeneinfo_idsort_temp &lt;- order(mygeneinfo_temp$ensembl_gene_id,decreasing=F)
+    # and sort the genes with those index numbers
+    mygeneinfo_sort_temp &lt;- mygeneinfo_temp[mygeneinfo_idsort_temp,]
+   
+    # get rid of duplicate ensembl IDs
+    mygeneinfo_s_uni_temp &lt;- mygeneinfo_sort_temp[order(mygeneinfo_sort_temp$ensembl_gene_id)[!duplicated(mygeneinfo_sort_temp$ensembl_gene_id)],]
+
+    # deal with duplicate gene name/symbols (mostly &quot;&quot;s) by identifying the duplicates and then creating a new gene name for them that is genesymbol.ensemblID
+dupl_temp &lt;- unique(mygeneinfo_s_uni_temp$hgnc_symbol[duplicated(mygeneinfo_s_uni_temp$hgnc_symbol)])
+for (k in dupl_temp)
+{
+  rows_temp &lt;- which(mygeneinfo_s_uni_temp$hgnc_symbol==k)
+  for (m in 1:length(rows_temp))
+  {
+    mygeneinfo_s_uni_temp$hgnc_symbol[rows_temp[m]] &lt;- paste(mygeneinfo_s_uni_temp$hgnc_symbol[rows_temp[m]], &#39;.&#39;, mygeneinfo_s_uni_temp$ensembl_gene_id[rows_temp[m]],sep=&#39;&#39;)
+  }
+}
+
+# make a gene info matrix with the now unique gene symbols
+mygeneinfo_gsym_temp &lt;- mygeneinfo_s_uni_temp[order(mygeneinfo_s_uni_temp$hgnc_symbol)[!duplicated(mygeneinfo_s_uni_temp$hgnc_symbol)],]
+
+# add those new gene names/symbols as rownames in the raw data matrix
+rownames(bm_rawdat_temp) &lt;- mygeneinfo_s_uni_temp$hgnc_symbol
+    
+# output the raw data matrix with the proper collection name
+assign(paste0(&quot;bm_rawdat_C&quot;,i,&quot;c&quot;,j),bm_rawdat_temp)
+  
+  }
+}
+
+# remove all those temp variables so it doesn&#39;t clutter my env
+rm(i,j,k,m,rows_temp,mygeneinfo_gsym_temp,mygeneinfo_idsort_temp,mygeneinfo_sort_temp,mygeneinfo_s_uni_temp,mygeneinfo_temp,gene_id_temp,raw_dat_temp,dupl_temp,bm_rawdat_temp)</code></pre>
+<p>Now let’s create the individual Seurat objects for each collection. I do this first so I can assign individual and diffday labels more easily, before merging and subsetting the object.</p>
+<pre class="r"><code>for(i in 1:3){
+  for(j in 1:6){
+    
+    bmrawdat_temp &lt;- eval(as.name(paste0(&quot;bm_rawdat_C&quot;,i,&quot;c&quot;,j)))
+    
+    SObject_temp &lt;-
+      CreateSeuratObject(bmrawdat_temp, min.cells=3, min.features=200,project=paste0(&quot;CD&quot;,i,&quot;col&quot;,j))
+
+    assign(paste0(&quot;CD&quot;,i,&quot;col&quot;,j,&quot;SObj&quot;),SObject_temp)
+    
+  }
+}
+
+rm(list=ls(pattern=&quot;bm_rawdat&quot;))
+rm(bmrawdat_temp,SObject_temp,i,j)
+
+# these are Seurat objects for each collection with gene symbols!
+# filtered by only genes in at least 3 cells and only cells with at least 200 genes</code></pre>
+<p>The next step is assigning labels for “individual” and “diffday” to each cell barcode. I do this using the results from demuxlet, which was run previously on the data from each collection.</p>
+<pre class="r"><code>for (i in 1:3){
+  for (j in 1:6){
+    
+    SObject &lt;- eval(as.name(paste0(&quot;CD&quot;,i,&quot;col&quot;,j,&quot;SObj&quot;)))
+    
+    demux_temp &lt;- read.table(paste0(&quot;/project2/gilad/reem/singlecellCM/round1/lowpass/CD&quot;,i,&quot;/CD&quot;,i,&quot;col&quot;,j,&quot;/demux/CD&quot;,i,&quot;col&quot;,j,&quot;_demux.best&quot;),header=T,stringsAsFactors=F)
+    
+    #demux_temp &lt;- demux_temp[-1,]
+    
+    m &lt;- match(rownames(SObject@meta.data),demux_temp$BARCODE)
+    if(any(is.na(m))) cat(paste0(&quot;Not all barcodes are in demuxlet data. Something is wrong in CD&quot;,i,&quot;col&quot;,j,&quot;!\n&quot;))
+    
+    demux_temp &lt;- demux_temp[m,]
+    
+    demux_temp$individual &lt;- &quot;doublet&quot;
+    demux_temp$individual[which(demux_temp$BEST==&quot;SNG-NA19093&quot;)] &lt;- &quot;NA19093&quot;
+    demux_temp$individual[which(demux_temp$BEST==&quot;SNG-NA18912&quot;)] &lt;- &quot;NA18912&quot;
+    demux_temp$individual[which(demux_temp$BEST==&quot;SNG-NA18858&quot;)] &lt;- &quot;NA18858&quot;
+    demux_temp$individual[which(demux_temp$BEST==&quot;SNG-NA18520&quot;)] &lt;- &quot;NA18520&quot;
+    demux_temp$individual[which(demux_temp$BEST==&quot;SNG-NA18511&quot;)] &lt;- &quot;NA18511&quot;
+    demux_temp$individual[which(demux_temp$BEST==&quot;SNG-NA18508&quot;)] &lt;- &quot;NA18508&quot;
+    
+    tmp_ind &lt;- demux_temp$individual
+    names(tmp_ind) &lt;- demux_temp$BARCODE
+    
+    demux_temp$diffday &lt;- &quot;NA&quot;
+    
+    # col 1 for all CDs
+    if(j == 1){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 3&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 1&quot;
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 11&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 5&quot;
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 15&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 11&quot;
+        # add day 0 col1 here
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 0&quot;
+      }
+    }
+    
+    # col 2 for all CDs
+    if(j == 2){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 3&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 1&quot;
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 11&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 5&quot;
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 15&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 11&quot;
+        ## add day 0 col 2
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 0&quot;
+      }
+    }
+    
+    # col 3 for all CDs
+    if(j == 3){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 3&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 1&quot;
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 11&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 5&quot;
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 15&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 11&quot;
+        # add day 0 col 3
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 0&quot;
+        }
+    }
+    
+    # col 4 for all CDs
+    if(j == 4){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 3&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 1&quot;
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 11&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 5&quot;
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18520&quot;)] &lt;- &quot;Day 15&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 11&quot;
+        # add day 0 col 4
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 0&quot;
+        }
+    }
+    
+    # col 5 for all CDs
+    if(j == 5){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 3&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 1&quot;
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 11&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 5&quot;
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18508&quot;)] &lt;- &quot;Day 15&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 11&quot;
+        # add day 0 col 5
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 0&quot;
+        }
+    }
+    
+    # col 6 for all CDs
+    if(j == 6){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 3&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 1&quot;
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 11&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 7&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18912&quot;)] &lt;- &quot;Day 5&quot;
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18511&quot;)] &lt;- &quot;Day 15&quot;
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA18858&quot;)] &lt;- &quot;Day 11&quot;
+        # add day 0 col 6
+        demux_temp$diffday[which(demux_temp$individual==&quot;NA19093&quot;)] &lt;- &quot;Day 0&quot;
+        }
+    }
+    
+    tmp_dday &lt;- demux_temp$diffday
+    names(tmp_dday) &lt;- demux_temp$BARCODE
+    
+    SObject &lt;- AddMetaData(SObject, tmp_ind, col.name = &quot;individual&quot;)
+    SObject &lt;- AddMetaData(SObject, tmp_dday, col.name = &quot;diffday&quot;)
+    
+    assign(paste0(&quot;CD&quot;,i,&quot;col&quot;,j,&quot;_lbld&quot;),SObject)
+  }
+}
+
+rm(i,j,m,tmp_dday,tmp_ind,SObject,demux_temp)
+rm(list=ls(pattern=&quot;SObj&quot;))
+
+# this is a mess lol but i&#39;m leaving it until I need to find a better way
+
+# if we want to explore the data, can do:
+# table(CD1col1_lbld$individual)
+# table(CD1col1_lbld$diffday)</code></pre>
+<p>For CD1col1, number of cells: 19093 Day 7 = 1021 18912 Day 3 = 816 18520 Day 1 = 936 For CD1col2, number of cells: 18858 Day 7 = 751 18520 Day 3 = 1011 18508 Day 1 = 286 For CD1col3, number of cells: 18912 Day 7 = 739 18508 Day 3 = 986 18511 Day 1 = 1523 For CD1col4, number of cells: 18520 Day 7 = 308 18511 Day 3 = 437 19093 Day 1 = 2177 For CD1col5, number of cells: 18508 Day 7 = 674 19093 Day 3 = 869 18858 Day 1 = 1237 For CD1col6, number of cells: 18511 Day 7 = 306 18858 Day 3 = 519 18912 Day 1 = 440</p>
+<p>For CD2col1, number of cells: 19093 Day 11 = 603 18912 Day 7 = 335 18520 Day 5 = 734 sooo many doublets…(1622) For CD2col2, number of cells: 18858 Day 11 = 318 18520 Day 7 = 517 18508 Day 5 = 427 For CD2col3, number of cells: 18912 Day 11 = 477 18508 Day 7 = 205 18511 Day 5 = 604 For CD2col4, number of cells: 18520 Day 11 = 603 18511 Day 7 = 888 19093 Day 5 = 619 For CD2col5, number of cells: 18508 Day 11 = 479 19093 Day 7 = 506 18858 Day 5 = 344 For CD2col6, number of cells: 18511 Day 11 = 362 18858 Day 7 = 734 18912 Day 5 = 730</p>
+<p>For CD3col1, number of cells: 19093 Day 15 = 531 18912 Day 11 = 453 18858 Day 0 = 794 For CD3col2, number of cells: 18858 Day 15 = 456 18520 Day 11 = 391 18912 Day 0 = 1682 For CD3col3, number of cells: 18912 Day 15 = 474 18508 Day 11 = 528 18520 Day 0 = 297 tons of doublets…(1455) For CD3col4, number of cells: 18520 Day 15 = 523 18511 Day 11 = 320 18508 Day 0 = 1529 For CD3col5, number of cells: 18508 Day 15 = 468 19093 Day 11 = 442 18511 Day 0 = 2059 lots of doublets…(1270) For CD3col6, number of cells: 18511 Day 15 = 329 18858 Day 11 = 399 19093 Day 0 = 681</p>
+<p>Now that I’ve added metadata tags for “individual” and “diffday” for each collection, I can combine data all collections into a single Seurat object. I will subset to remove all cells that were labeled doublets, or cells that had the wrong individual label given the collection (which I check separately).</p>
+<pre class="r"><code># merge AFTER giving them individual and diffday labels
+
+all_cols_S &lt;- merge(CD1col1_lbld,y=c(CD1col2_lbld,CD1col3_lbld,CD1col4_lbld,CD1col5_lbld,CD1col6_lbld,CD2col1_lbld,CD2col2_lbld,CD2col3_lbld,CD2col4_lbld,CD2col5_lbld,CD2col6_lbld,CD3col1_lbld,CD3col2_lbld,CD3col3_lbld,CD3col4_lbld,CD3col5_lbld,CD3col6_lbld), add.cell.ids = c(&quot;CD1col1&quot;,&quot;CD1col2&quot;,&quot;CD1col3&quot;,&quot;CD1col4&quot;,&quot;CD1col5&quot;,&quot;CD1col6&quot;,&quot;CD2col1&quot;,&quot;CD2col2&quot;,&quot;CD2col3&quot;,&quot;CD2col4&quot;,&quot;CD2col5&quot;,&quot;CD2col6&quot;,&quot;CD3col1&quot;,&quot;CD3col2&quot;,&quot;CD3col3&quot;,&quot;CD3col4&quot;,&quot;CD3col5&quot;,&quot;CD3col6&quot;), project=&quot;CMdiff_round1_lowpass&quot;)
+
+# it worked!
+# this object has 21277 features across 46581 samples
+
+table(all_cols_S$orig.ident)</code></pre>
+<pre><code>
+CD1col1 CD1col2 CD1col3 CD1col4 CD1col5 CD1col6 CD2col1 CD2col2 CD2col3 
+   3430    2446    3680    3300    3057    1809    3295    1334    1400 
+CD2col4 CD2col5 CD2col6 CD3col1 CD3col2 CD3col3 CD3col4 CD3col5 CD3col6 
+   2698    1608    2104    2095    2837    2799    2796    4255    1638 </code></pre>
+<pre class="r"><code># a range of cell nos per col from 1334 in C2c2 to 4255 in C3c5
+
+# now i want to subset so only the cells with an individual and a diffday are being used (i.e. no mislabeled individuals on each collection and no doublets)
+Idents(all_cols_S) &lt;- &quot;diffday&quot;
+# make diffday the relevant identity marker
+table(Idents(all_cols_S))</code></pre>
+<pre><code>
+ Day 7  Day 3  Day 1     NA  Day 5 Day 11 Day 15  Day 0 
+  6984   4638   6599   9604   3458   5375   2881   7042 </code></pre>
+<pre class="r"><code># a range of cell nos per diffday from 2881 in D15 to 7042 in D0
+
+all_cols_noNA_S = subset(all_cols_S, idents = c(&quot;Day 1&quot;,&quot;Day 3&quot;,&quot;Day 5&quot;,&quot;Day 7&quot;,&quot;Day 11&quot;,&quot;Day 15&quot;,&quot;Day 0&quot;))
+
+# now this object has 21277 features across 36977 samples
+# there should be no doublets or mis-IDed cells here
+
+# finally, i&#39;ll remove the individual Seurat objects for each col
+rm(list=ls(pattern=&quot;lbld&quot;))
+# and the raw data which i shouldn&#39;t need anymore
+rm(list=ls(pattern=&quot;rawdata&quot;))</code></pre>
+<p>I will make a “sample” label in the metadata tag, which has the combined individual and diffday information in the form: NAInd.Day#</p>
+<pre class="r"><code># let&#39;s make a column that&#39;s a combo of individual and diffday
+all_cols_noNA_S$sample &lt;- &quot;IND.DAY&quot;
+
+all_cols_noNA_S$sample &lt;- paste0(all_cols_noNA_S$individual,&quot;.&quot;,all_cols_noNA_S$diffday)
+
+# i will also add metadata info for percent mitochondrial genes
+all_cols_noNA_S[[&quot;percent.mito&quot;]] &lt;- PercentageFeatureSet(all_cols_noNA_S, pattern=&quot;^MT-&quot;)</code></pre>
+<p>We now have a large Seurat object with all data from the 18 collections, excluding doublets and incorrectly labeled cells. Each has a metadata tag relating the individual and diffday of the sample.</p>
+<ul>
+<li>Remember: Every day 7 and day 11 actually has two collections!</li>
+</ul>
+<p>From here, I will start making plots to visualize some basic QC metrics in the data. But first, I’d like to order the sample names in a more intuitive way for visualization.</p>
+<pre class="r"><code># first, let&#39;s order the levels in a more intuitive way
+# for diffday
+mydaylevels &lt;- c(&quot;Day 0&quot;,&quot;Day 1&quot;,&quot;Day 3&quot;,&quot;Day 5&quot;,&quot;Day 7&quot;,&quot;Day 11&quot;,&quot;Day 15&quot;)
+all_cols_noNA_S@meta.data$diffday &lt;- factor(x=all_cols_noNA_S@meta.data$diffday, levels=mydaylevels)
+# for individual
+myindlevels &lt;- c(&quot;NA19093&quot;,&quot;NA18858&quot;,&quot;NA18912&quot;,&quot;NA18520&quot;,&quot;NA18508&quot;,&quot;NA18511&quot;)
+all_cols_noNA_S@meta.data$individual &lt;- factor(x=all_cols_noNA_S@meta.data$individual, levels=myindlevels)
+# for sample
+mysamplelevels &lt;- as.character(all_cols_noNA_S$sample)
+mysamplelevels &lt;- mixedsort(mysamplelevels, decreasing = F)
+mysamplelevels &lt;- unique(mysamplelevels)
+all_cols_noNA_S@meta.data$sample &lt;- factor(x=all_cols_noNA_S@meta.data$sample, levels=mysamplelevels)</code></pre>
+<p>I’ll start by analyzing the distribution of gene counts per cell (nFeature_RNA), read counts per cell (nCount_RNA), and percent mitochondrial genes (percent.mito).</p>
+<pre class="r"><code># now for some violin plots to look at gene count, read count, and percent mito genes
+VlnPlot(all_cols_noNA_S, features=c(&quot;nFeature_RNA&quot;,&quot;nCount_RNA&quot;,&quot;percent.mito&quot;),ncol=3, group.by = &quot;individual&quot;,pt.size = 0)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># hmmm maybe.
+# dots are overwhelming so i made point size = 0 to get rid of them
+VlnPlot(all_cols_noNA_S, features=c(&quot;nFeature_RNA&quot;,&quot;nCount_RNA&quot;,&quot;percent.mito&quot;),ncol=3, group.by = &quot;diffday&quot;)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># now vlnplot again but group by sample
+VlnPlot(all_cols_noNA_S, features=&quot;nFeature_RNA&quot;, group.by = &quot;sample&quot;, pt.size=0)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>VlnPlot(all_cols_noNA_S, features=&quot;nCount_RNA&quot;, group.by = &quot;sample&quot;, pt.size=0)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>VlnPlot(all_cols_noNA_S, features=&quot;percent.mito&quot;, group.by = &quot;sample&quot;, pt.size=0)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># can see an effect by collection day, expected
+
+# we can look at this by individual too
+Idents(all_cols_noNA_S) &lt;- &quot;individual&quot;
+VlnPlot(all_cols_noNA_S, features=&quot;percent.mito&quot;, group.by = &quot;sample&quot;, pt.size=0.2, idents= &quot;NA19093&quot;)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># or by diff day for all individuals
+Idents(all_cols_noNA_S) &lt;- &quot;diffday&quot;
+VlnPlot(all_cols_noNA_S, features=&quot;nFeature_RNA&quot;, group.by = &quot;sample&quot;, pt.size=0.2, idents= &quot;Day 7&quot;)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># finally, let&#39;s look at some feature scatter plots
+FeatureScatter(all_cols_noNA_S,feature1=&quot;nCount_RNA&quot;,feature2 = &quot;percent.mito&quot;,group.by = &quot;sample&quot;)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-8.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>FeatureScatter(all_cols_noNA_S,feature1=&quot;nCount_RNA&quot;,feature2 = &quot;nFeature_RNA&quot;,group.by = &quot;sample&quot;)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/violin%20and%20feature%20scatter%20plots-9.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## FOR THE FUTURE!!!
+# can I do a statistical test here to see if the difference in gene counts or percent mito between individuals or diff days is significant?</code></pre>
+<p>We can use what we found from the previous plots to filter the data by quality. When we made the Seurat objects, we applied the following filters: only include genes expressed in at least 3 cells, and only include cells with at least 200 genes. Now, we can subject further for percent mitochondrial genes, for example. We can also log normalize the data.</p>
+<pre class="r"><code>all_cols_filter_S &lt;- subset(all_cols_noNA_S, subset = percent.mito &lt; 30)
+# now have 32361 cells total (4600ish fewer than before)
+all_cols_filter_S &lt;- NormalizeData(all_cols_filter_S)
+# default is log normalize</code></pre>
+<p>Using our newly filtered and normalized data, we can perform feature selection to identify the most variable genes in the combined dataset. I can do this for all samples (all individuals at all diffdays from all coldays), but I would also like to do it only between the same individual at different days, only between the same diffday for different individuals, etc.</p>
+<pre class="r"><code># identifying the top 2000 variable genes between all cells (all individuals, all diffdays)
+all_cols_filter_S &lt;- FindVariableFeatures(all_cols_filter_S, selection.method = &quot;vst&quot;, nfeatures=2000)
+
+top25genes&lt;- head(VariableFeatures(all_cols_filter_S),25)
+# top 25 genes with the highest variability between cells include:
+# PLEKHH2, AFP, NPPA, NPPB, ENSG00000254584, TNFSF13B, ACTA1, APOA2, FGB, TTR, SERPINA1, APOA1, MYL7, S100A14, EMC10, ANKRD1, ACTC1, CER1, SLITRK5, DKK4, SYT14, CGA, TNNT2, CSRP3, HS3ST1
+
+plot_varfeats &lt;- VariableFeaturePlot(all_cols_filter_S)
+plot_varfeatslbld &lt;- LabelPoints(plot=plot_varfeats,points=top25genes,repel=T)</code></pre>
+<pre><code>Warning: Using `as.character()` on a quosure is deprecated as of rlang 0.3.0.
+Please use `as_label()` or `as_name()` instead.
+This warning is displayed once per session.</code></pre>
+<pre><code>When using repel, set xnudge and ynudge to 0 for optimal results</code></pre>
+<pre class="r"><code>plot_varfeatslbld</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/feature%20selection-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># PLEKHH2 is the top by far... it&#39;s in the lung and uterus? and kidney maybe? involved in actin stabilization and can recruit TFGb.
+
+#### QUESTION FOR FURTHER CONSIDERATION!!!!!
+# is there a way to do this for a subset of cells? like only one individual at all days? without subsetting the whole Seurat object?</code></pre>
+<p>Maybe the only way to do variable feature selection on a subset of our samples is to subset the Seurat object first, and then do feature selection on that new object.</p>
+<pre class="r"><code>Idents(all_cols_filter_S) &lt;- &quot;individual&quot;
+subset_19093 &lt;- subset(all_cols_filter_S, idents = &quot;NA19093&quot;)
+subset_19093 &lt;- FindVariableFeatures(subset_19093, selection.method = &quot;vst&quot;, nfeatures=2000)
+
+top25genes_19093 &lt;- head(VariableFeatures(subset_19093),25)
+# a similar list to the full dataset with PLEKHH2 on top
+
+plot_varfeats_19093 &lt;- VariableFeaturePlot(subset_19093)
+plot_varfeatslbld_19093 &lt;- LabelPoints(plot=plot_varfeats_19093,points=top25genes_19093,repel=T)</code></pre>
+<pre><code>When using repel, set xnudge and ynudge to 0 for optimal results</code></pre>
+<pre class="r"><code>plot_varfeatslbld_19093</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/subset%20to%20only%20an%20individual%20for%20feature%20selection-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># and for a different individual
+
+Idents(all_cols_filter_S) &lt;- &quot;individual&quot;
+subset_18520 &lt;- subset(all_cols_filter_S, idents = &quot;NA18520&quot;)
+subset_18520 &lt;- FindVariableFeatures(subset_18520, selection.method = &quot;vst&quot;, nfeatures=2000)
+
+top25genes_18520 &lt;- head(VariableFeatures(subset_18520),25)
+# a similar list to the full dataset but with EMC10 on top and TNNT2 way higher on the list...
+
+plot_varfeats_18520 &lt;- VariableFeaturePlot(subset_18520)
+plot_varfeatslbld_18520 &lt;- LabelPoints(plot=plot_varfeats_18520,points=top25genes_18520,repel=T)</code></pre>
+<pre><code>When using repel, set xnudge and ynudge to 0 for optimal results</code></pre>
+<pre class="r"><code>plot_varfeatslbld_18520</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/subset%20to%20only%20an%20individual%20for%20feature%20selection-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># and one more
+
+subset_18511 &lt;- subset(all_cols_filter_S, idents = &quot;NA18511&quot;)
+subset_18511 &lt;- FindVariableFeatures(subset_18511, selection.method = &quot;vst&quot;, nfeatures=2000)
+
+top25genes_18511 &lt;- head(VariableFeatures(subset_18511),25)
+# a similar list to the full dataset with PLEKHH2 on top
+
+plot_varfeats_18511 &lt;- VariableFeaturePlot(subset_18511)
+plot_varfeatslbld_18511 &lt;- LabelPoints(plot=plot_varfeats_18511,points=top25genes_18511,repel=T)</code></pre>
+<pre><code>When using repel, set xnudge and ynudge to 0 for optimal results</code></pre>
+<pre class="r"><code>plot_varfeatslbld_18511</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/subset%20to%20only%20an%20individual%20for%20feature%20selection-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>Idents(all_cols_filter_S) &lt;- &quot;diffday&quot;
+subset_day0 &lt;- subset(all_cols_filter_S, idents = &quot;Day 0&quot;)
+subset_day0 &lt;- FindVariableFeatures(subset_day0, selection.method = &quot;vst&quot;, nfeatures=2000)
+
+top25genes_day0 &lt;- head(VariableFeatures(subset_day0),25)
+# hmmm
+# i&#39;m getting EMC10 and CARS2 on top, PLEKHH2 a little further. also TNNT2, MYH6, TTN, MYL7, etc.
+# something is wrong here. have some things been mislabeled as day 0 ???
+
+plot_varfeats_day0 &lt;- VariableFeaturePlot(subset_day0)
+plot_varfeatslbld_day0 &lt;- LabelPoints(plot=plot_varfeats_day0,points=top25genes_day0,repel=T)</code></pre>
+<pre><code>When using repel, set xnudge and ynudge to 0 for optimal results</code></pre>
+<pre class="r"><code>plot_varfeatslbld_day0</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/subset%20to%20only%20a%20diff%20day%20for%20feature%20selection-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## now day 15
+subset_day15 &lt;- subset(all_cols_filter_S, idents = &quot;Day 15&quot;)
+subset_day15 &lt;- FindVariableFeatures(subset_day15, selection.method = &quot;vst&quot;, nfeatures=2000)
+
+top25genes_day15 &lt;- head(VariableFeatures(subset_day15),25)
+# heart stuff for the most part (NPPA, NPPB, MYL7, etc)
+# the top one is AFP
+
+plot_varfeats_day15 &lt;- VariableFeaturePlot(subset_day15)
+plot_varfeatslbld_day15 &lt;- LabelPoints(plot=plot_varfeats_day15,points=top25genes_day15,repel=T)</code></pre>
+<pre><code>When using repel, set xnudge and ynudge to 0 for optimal results</code></pre>
+<pre class="r"><code>plot_varfeatslbld_day15</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/subset%20to%20only%20a%20diff%20day%20for%20feature%20selection-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># now day 3
+subset_day3 &lt;- subset(all_cols_filter_S, idents = &quot;Day 3&quot;)
+subset_day3 &lt;- FindVariableFeatures(subset_day3, selection.method = &quot;vst&quot;, nfeatures=2000)
+
+top25genes_day3 &lt;- head(VariableFeatures(subset_day3),25)
+# top gene is PLEKHH2 but the rest aren&#39;t really heart related
+# DKK4, CARS2, GAL, HIST1H1D, CXCL14, etc
+
+plot_varfeats_day3 &lt;- VariableFeaturePlot(subset_day3)
+plot_varfeatslbld_day3 &lt;- LabelPoints(plot=plot_varfeats_day3,points=top25genes_day3,repel=T)</code></pre>
+<pre><code>When using repel, set xnudge and ynudge to 0 for optimal results</code></pre>
+<pre class="r"><code>plot_varfeatslbld_day3</code></pre>
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/subset%20to%20only%20a%20diff%20day%20for%20feature%20selection-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Next, we scale the data and perform linear dimensionality reduction using PCA. We can visualize the loadings for top PCs on a PCA plot or using a heatmap with only the most extreme cells included (for speed). We can also create an elbow plot to help us visualize how many PCs to consider using for downstream analysis.</p>
+<pre class="r"><code>all.genes_com &lt;- rownames(all_cols_filter_S)
+all_cols_scaled_S &lt;- ScaleData(all_cols_filter_S, features=all.genes_com)</code></pre>
+<pre><code>Centering and scaling data matrix</code></pre>
+<pre class="r"><code>all_cols_scaled_S &lt;- RunPCA(all_cols_scaled_S, features= VariableFeatures(all_cols_scaled_S))</code></pre>
+<pre><code>PC_ 1 
+Positive:  MALAT1, TNNT2, TPM1, MYL7, TNNI1, MYH6, TTN, MYL4, NEBL, IGF2 
+       VIM, EMC10, COL3A1, ACTC1, NEXN, ANKRD1, TECRL, MEIS2, SMPX, COL1A1 
+       PLN, TRIM55, RHOBTB3, DGKI, FILIP1, SLC8A1, MYL3, SVIL, TNNC1, LIX1 
+Negative:  L1TD1, DPPA4, TDGF1, ESRG, EPCAM, SFRP2, TUBB2B, UCHL1, HMGA1, DDX21 
+       HSPD1, SET, TPM3, POLR3G, RPL22L1, USP44, PAICS, CKS2, TKT, LINC00678 
+       PTMA, NOP56, NCL, PMAIP1, DNMT3B, PARP1, ENO1, .ENSG00000254277, TUBB2A, SCG3 
+PC_ 2 
+Positive:  TNNT2, EMC10, NEXN, MYH6, ACTC1, NEBL, MYL4, TTN, MYL7, TPM1 
+       ANKRD1, SMPX, TRIM55, FILIP1, TNNI1, SLC8A1, PLN, TNNC1, PPP1R12B, ACTN2 
+       MYL3, SYNPO2L, MYL9, SORBS2, PDLIM5, NPPA, MYOCD, CMYA5, TECRL, NES 
+Negative:  MIXL1, LINC01356, LINC00458, PTMA, TUBB2B, CER1, HIST1H4C, APLNR, NTS, CYP26A1 
+       CNTNAP2, TBX6, LHX1, TUBB2A, GAL, MSX1, WNT8A, L1TD1, DCN, DKK4 
+       .ENSG00000255666, SERPINE2, ZIC3, EOMES, IFITM1, .ENSG00000282024, SAMD3, TBXT, LUM, PCDH19 
+PC_ 3 
+Positive:  COL3A1, IGF2, SPARC, DCN, COL1A2, LUM, COL1A1, VIM, IGFBP5, MAB21L2 
+       S100A10, HAND1, H19, FRZB, DSP, GPC3, KRT19, MALAT1, SLC9A3R1, KRT8 
+       IGFBP3, DAB2, AKAP12, TTC3, SOX6, PLAT, IL6ST, MEST, TMEM88, MAF 
+Negative:  MYH6, EMC10, SMPX, ACTC1, MYL3, MYL4, TNNC1, NPPA, ACTN2, CSRP3 
+       NEBL, SORBS2, MYBPC3, PPP1R12B, PLN, MYL7, TRIM55, SLC8A1, LDB3, SYNPO2L 
+       TRDN, MYH7, L1TD1, MYOM1, TTN, HRC, CMYA5, TNNT2, MYOZ2, TCEA3 
+PC_ 4 
+Positive:  MT-TP, MT-TS2, MT-TF, APLNR, SERPINE2, BNIP3, CNTNAP2, MIXL1, HAS2, LINC01356 
+       MT-TL1, PCDH10, .ENSG00000238178, HAPLN1, MT-TV, CRABP2, LHX1, PRTG, LINC00458, CER1 
+       TUBB2B, MT-TC, CYP26A1, LDHA, EOMES, TUBB2A, MSX1, FBN2, SNHG25, H1F0 
+Negative:  COL3A1, TERF1, DCN, LUM, POLR3G, FOXD3-AS1, EZR, UCHL1, IGFBP5, DNMT3B 
+       USP44, LNCPRESS1, TMSB4X, CALD1, CNMD, LINC00678, S100A10, PODXL, FRZB, IGF2 
+       ANXA1, CD24, TPM1, SPATS2L, RPL22L1, SOX2, VASH2, PRSS35, ARID5B, THY1 
+PC_ 5 
+Positive:  MIXL1, TUBB2A, MT-TP, TUBB2B, COL3A1, MT-TF, DCN, SNHG25, COL1A2, ALDH3A2 
+       .ENSG00000255666, NODAL, LINC00458, LINC01356, TBXT, GAL, SERPINB9, OLFML3, GLIPR1L1, IFITM1 
+       CNTNAP2, RBP1, ACSL4, DSP, MT-TL1, LUM, BEX2, MT-TS2, SPARC, NEFL 
+Negative:  TTR, GATA3, S100A14, APOA2, APELA, HHEX, FN1, APOA1, CD24, PCAT14 
+       KRT19, IFI16, EPSTI1, TBX3, FAM184A, APOB, CCKBR, PPFIBP2, DLK1, FGD6 
+       LAMA1, HAPLN1, ID1, HAS2, RIPPLY3, ISL1, CGN, TERF1, ADM, RGS5 </code></pre>
+<pre class="r"><code>print(all_cols_scaled_S[[&quot;pca&quot;]],dims=1:5,nfeatures=5)</code></pre>
+<pre><code>PC_ 1 
+Positive:  MALAT1, TNNT2, TPM1, MYL7, TNNI1 
+Negative:  L1TD1, DPPA4, TDGF1, ESRG, EPCAM 
+PC_ 2 
+Positive:  TNNT2, EMC10, NEXN, MYH6, ACTC1 
+Negative:  MIXL1, LINC01356, LINC00458, PTMA, TUBB2B 
+PC_ 3 
+Positive:  COL3A1, IGF2, SPARC, DCN, COL1A2 
+Negative:  MYH6, EMC10, SMPX, ACTC1, MYL3 
+PC_ 4 
+Positive:  MT-TP, MT-TS2, MT-TF, APLNR, SERPINE2 
+Negative:  COL3A1, TERF1, DCN, LUM, POLR3G 
+PC_ 5 
+Positive:  MIXL1, TUBB2A, MT-TP, TUBB2B, COL3A1 
+Negative:  TTR, GATA3, S100A14, APOA2, APELA </code></pre>
+<pre class="r"><code># for PC1, top positive is MALAT1, TNNT2, TPM1, MYL7, TNNI1
+# PC1 top negative is L1TD1, DPPA4, TDGF1, ESRG, EPCAM
+# for PC2, top positive is TNNT2, EMC10, NEXN, MYH6, ACTC1
+# PC2 top negative is MIXL1, LINC01356, LINC00458, PTMA, TUBB2B
+
+VizDimLoadings(all_cols_scaled_S, dims = 1:2,nfeatures=24, reduction = &quot;pca&quot;, balanced=T)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/pca-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># 12 genes + and 12 -for PC1 and 2
+VizDimLoadings(all_cols_scaled_S, dims = 1:2,nfeatures=30, reduction = &quot;pca&quot;, balanced=F)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/pca-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># this is unbalanced between + and -
+
+# By diffday, you can see a gradient along both PC1 and PC2
+DimPlot(all_cols_scaled_S,reduction=&quot;pca&quot;,group.by = &quot;diffday&quot;, label=T, repel=T, label.size = 5)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/pca-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># By individual, you don&#39;t see much of an effect along PCs 1 and 2
+DimPlot(all_cols_scaled_S,reduction=&quot;pca&quot;,group.by = &quot;individual&quot;, label=T, repel=T, label.size = 5)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/pca-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>DimHeatmap(all_cols_scaled_S, dims=1, cells=500, balanced = T)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/pca-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># heatmap just for top 500 cells on PC1
+DimHeatmap(all_cols_scaled_S, dims=1:15, cells=500, balanced = T)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/pca-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># PCs 1 through 15
+
+ElbowPlot(all_cols_scaled_S)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/pca-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># to see how many PCs to use for further analysis</code></pre>
+<p>Here, we will find nearest neighbors and identify clusters in our combined dataset. We can perform nonlinear dimensionality reduction and visualize the data with a UMAP plot, colored/labeled by UMAP-identified clusters or by our sample labels. We can also identify marker genes that are most characteristic of each cluster.</p>
+<pre class="r"><code>all_cols_scaled_S &lt;- FindNeighbors(all_cols_scaled_S, dims=1:10)</code></pre>
+<pre><code>Computing nearest neighbor graph</code></pre>
+<pre><code>Computing SNN</code></pre>
+<pre class="r"><code>all_cols_scaled_S &lt;- FindClusters(all_cols_scaled_S, resolution=0.5)</code></pre>
+<pre><code>Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
+
+Number of nodes: 32361
+Number of edges: 1022646
+
+Running Louvain algorithm...
+Maximum modularity in 10 random starts: 0.8992
+Number of communities: 13
+Elapsed time: 9 seconds</code></pre>
+<pre class="r"><code>head(Idents(all_cols_scaled_S),5)</code></pre>
+<pre><code>CD3col1_AAAACCAGCGAC CD3col1_AAAAGGGGCCCC CD3col1_AAACAATAATGT 
+                   6                    6                    3 
+CD3col1_AAACCGCAGGTA CD3col1_AAACCGGACGCC 
+                   3                    3 
+Levels: 0 1 2 3 4 5 6 7 8 9 10 11 12</code></pre>
+<pre class="r"><code>all_cols_scaled_S &lt;- RunUMAP(all_cols_scaled_S, dims=1:10)
+# to make this work i need to module unload python then module load python/3.5.2 in midway2
+DimPlot(all_cols_scaled_S, reduction=&quot;umap&quot;, label=T, repel=T, label.size = 5)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/clustering-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>DimPlot(all_cols_scaled_S, reduction=&quot;umap&quot;,group.by = &quot;sample&quot;, label=T, repel=T, label.size = 5)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/clustering-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># i think it doesn&#39;t want to label by sample because there are too many????
+DimPlot(all_cols_scaled_S, reduction=&quot;umap&quot;,group.by = &quot;diffday&quot;, label=T, repel=T, label.size = 5)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/clustering-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># by diffday a nice gradient, by individual mostly a mess
+
+
+cluster1markers_c &lt;- FindMarkers(all_cols_scaled_S, ident.1 = 1, min.pct = 0.25)
+head(cluster1markers_c,n=5)</code></pre>
+<pre><code>         p_val  avg_logFC pct.1 pct.2 p_val_adj
+MDK          0  1.0557701 0.675 0.587         0
+MALAT1       0  0.5643506 0.988 0.950         0
+HSP90AB1     0 -0.4713224 0.691 0.935         0
+HNRNPD       0 -0.5741826 0.187 0.606         0
+PAICS        0 -0.6059610 0.108 0.473         0</code></pre>
+<pre class="r"><code># 
+
+cluster.day7.markers &lt;- FindMarkers(all_cols_scaled_S, ident.1= &quot;Day 7&quot;,group.by=&quot;diffday&quot;,min.cells.feature = 0.25)
+head(cluster.day7.markers,n=10)</code></pre>
+<pre><code>      p_val avg_logFC pct.1 pct.2 p_val_adj
+MYH6      0 1.4767569 0.275 0.092         0
+TTN       0 1.0045504 0.377 0.163         0
+NEBL      0 1.0009812 0.295 0.114         0
+DLK1      0 0.9770281 0.160 0.033         0
+IGF2      0 0.9610538 0.460 0.196         0
+TPM1      0 0.8827140 0.876 0.654         0
+VIM       0 0.8629628 0.647 0.370         0
+MEF2C     0 0.8271692 0.157 0.031         0
+MDK       0 0.7596414 0.800 0.549         0
+TNNT2     0 0.7562959 0.481 0.245         0</code></pre>
+<pre class="r"><code># 
+
+##cluster19093markers &lt;- FindMarkers(C1c1S_genesym_sub, ident.1 = &quot;NA19093&quot;, group.by = &quot;individual&quot;,logfc.threshold = 0.25, test.use = &quot;roc&quot;,only.pos = T)
+# can do this test roc to see classification power of each gene
+
+cluster.markers_c &lt;- FindAllMarkers(all_cols_scaled_S, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)</code></pre>
+<pre><code>Calculating cluster 0</code></pre>
+<pre><code>Calculating cluster 1</code></pre>
+<pre><code>Calculating cluster 2</code></pre>
+<pre><code>Calculating cluster 3</code></pre>
+<pre><code>Calculating cluster 4</code></pre>
+<pre><code>Calculating cluster 5</code></pre>
+<pre><code>Calculating cluster 6</code></pre>
+<pre><code>Calculating cluster 7</code></pre>
+<pre><code>Calculating cluster 8</code></pre>
+<pre><code>Calculating cluster 9</code></pre>
+<pre><code>Calculating cluster 10</code></pre>
+<pre><code>Calculating cluster 11</code></pre>
+<pre><code>Calculating cluster 12</code></pre>
+<pre class="r"><code>#can&#39;t figure out a way to do this for cell line vs all other cells, so for now it&#39;s just every Seurat identified cluster vs all other cells
+cluster.markers_c %&gt;% group_by(cluster) %&gt;% top_n(n=2,wt=avg_logFC)</code></pre>
+<pre><code># A tibble: 26 x 7
+# Groups:   cluster [13]
+       p_val avg_logFC pct.1 pct.2 p_val_adj cluster gene  
+       &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt; 
+ 1 0.            1.19  0.576 0.311 0.        0       TUBB2B
+ 2 1.15e-215     1.08  0.381 0.216 2.44e-211 0       TUBB2A
+ 3 0.            1.06  0.675 0.587 0.        1       MDK   
+ 4 4.93e-163     0.872 0.523 0.409 1.05e-158 1       VIM   
+ 5 0.            1.19  0.95  0.272 0.        2       TUBB2B
+ 6 0.            1.14  0.85  0.163 0.        2       TUBB2A
+ 7 0.            1.40  0.924 0.192 0.        3       TERF1 
+ 8 0.            1.16  0.996 0.409 0.        3       L1TD1 
+ 9 0.            3.72  0.876 0.161 0.        4       EMC10 
+10 0.            3.20  0.83  0.062 0.        4       MYH6  
+# … with 16 more rows</code></pre>
+<pre class="r"><code># 
+# i guess this is the top two for every cluster?
+
+cluster.markers_c %&gt;% group_by(&quot;diffday&quot;) %&gt;% top_n(n=5,wt=avg_logFC)</code></pre>
+<pre><code># A tibble: 5 x 8
+# Groups:   &quot;diffday&quot; [1]
+     p_val avg_logFC pct.1 pct.2 p_val_adj cluster gene         `&quot;diffday&quot;`
+     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;        &lt;chr&gt;      
+1 0.            3.72 0.876 0.161  0.       4       EMC10        diffday    
+2 0.            5.14 0.871 0.079  0.       12      PLEKHH2      diffday    
+3 0.            4.36 0.561 0.046  0.       12      .ENSG000002… diffday    
+4 0.            3.65 0.419 0.008  0.       12      TNFSF13B     diffday    
+5 3.36e-64      3.22 0.513 0.211  7.15e-60 12      FGFR1        diffday    </code></pre>
+<pre class="r"><code># by diffday, top 5 markers are 
+
+cluster.markers_c %&gt;% group_by(&quot;individual&quot;) %&gt;% top_n(n=5,wt=avg_logFC)</code></pre>
+<pre><code># A tibble: 5 x 8
+# Groups:   &quot;individual&quot; [1]
+     p_val avg_logFC pct.1 pct.2 p_val_adj cluster gene      `&quot;individual&quot;`
+     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;     &lt;chr&gt;         
+1 0.            3.72 0.876 0.161  0.       4       EMC10     individual    
+2 0.            5.14 0.871 0.079  0.       12      PLEKHH2   individual    
+3 0.            4.36 0.561 0.046  0.       12      .ENSG000… individual    
+4 0.            3.65 0.419 0.008  0.       12      TNFSF13B  individual    
+5 3.36e-64      3.22 0.513 0.211  7.15e-60 12      FGFR1     individual    </code></pre>
+<pre class="r"><code># </code></pre>
+<p>If we want a closer look at the difference in gene expression between samples for specific genes of interest, we can visualize those using violin plots for each gene of interest. We can also recreate our UMAP plot, with shading corresponding to gene expression of various marker genes of interest.</p>
+<pre class="r"><code>VlnPlot(all_cols_scaled_S, features=&quot;TNNT2&quot;,group.by = &quot;sample&quot;)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/gene%20by%20gene%20for%20combined-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># etc for any gene you want
+# this looks p different normalized or not btw
+
+Idents(all_cols_scaled_S) &lt;- &quot;individual&quot;
+VlnPlot(all_cols_scaled_S, features=&quot;TNNT2&quot;,group.by = &quot;sample&quot;, pt.size = 0.2, idents=&quot;NA18520&quot;)</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/gene%20by%20gene%20for%20combined-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># for some reason TNNT2 and MYL7 are being expressed in Day 0? in at least 18520 and 19093
+# the big plot says this is mostly a thing in TNNT2 for 18511 nd 18520
+# i&#39;ll have to think more about why this might be
+
+FeaturePlot(all_cols_scaled_S,features=c(&quot;POU5F1&quot;,&quot;SOX2&quot;,&quot;EPCAM&quot;,&quot;EOMES&quot;, &quot;MIXL1&quot;,&quot;HAND1&quot;,&quot;TNNT2&quot;,&quot;MYL7&quot;,&quot;MYH6&quot;))</code></pre>
+<p><img src="figure/scCM_round1_lowpass_combined.Rmd/gene%20by%20gene%20for%20combined-3.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] gtools_3.8.1   stringr_1.4.0  biomaRt_2.40.1 dplyr_0.8.3   
+[5] Seurat_3.0.2  
+
+loaded via a namespace (and not attached):
+  [1] Rtsne_0.15           colorspace_1.4-1     ggridges_0.5.1      
+  [4] rprojroot_1.3-2      fs_1.3.1             listenv_0.7.0       
+  [7] npsurv_0.4-0         ggrepel_0.8.1        bit64_0.9-7         
+ [10] fansi_0.4.0          AnnotationDbi_1.46.0 codetools_0.2-16    
+ [13] splines_3.6.1        R.methodsS3_1.7.1    lsei_1.2-0          
+ [16] knitr_1.23           zeallot_0.1.0        jsonlite_1.6        
+ [19] workflowr_1.4.0      ica_1.0-2            cluster_2.1.0       
+ [22] png_0.1-7            R.oo_1.22.0          sctransform_0.2.0   
+ [25] compiler_3.6.1       httr_1.4.0           backports_1.1.4     
+ [28] assertthat_0.2.1     Matrix_1.2-17        lazyeval_0.2.2      
+ [31] cli_1.1.0            prettyunits_1.0.2    htmltools_0.3.6     
+ [34] tools_3.6.1          rsvd_1.0.1           igraph_1.2.4.1      
+ [37] gtable_0.3.0         glue_1.3.1           RANN_2.6.1          
+ [40] reshape2_1.4.3       Rcpp_1.0.2           Biobase_2.44.0      
+ [43] vctrs_0.2.0          gdata_2.18.0         ape_5.3             
+ [46] nlme_3.1-140         gbRd_0.4-11          lmtest_0.9-37       
+ [49] xfun_0.8             globals_0.12.4       irlba_2.3.3         
+ [52] XML_3.98-1.20        future_1.14.0        MASS_7.3-51.4       
+ [55] zoo_1.8-6            scales_1.0.0         hms_0.5.0           
+ [58] parallel_3.6.1       RColorBrewer_1.1-2   curl_3.3            
+ [61] yaml_2.2.0           memoise_1.1.0        reticulate_1.12     
+ [64] pbapply_1.4-0        gridExtra_2.3        ggplot2_3.2.0       
+ [67] stringi_1.4.3        RSQLite_2.1.1        highr_0.8           
+ [70] S4Vectors_0.22.0     caTools_1.17.1.2     BiocGenerics_0.30.0 
+ [73] bibtex_0.4.2         Rdpack_0.11-0        SDMTools_1.1-221.1  
+ [76] rlang_0.4.0          pkgconfig_2.0.2      bitops_1.0-6        
+ [79] evaluate_0.14        lattice_0.20-38      ROCR_1.0-7          
+ [82] purrr_0.3.2          labeling_0.3         htmlwidgets_1.3     
+ [85] cowplot_1.0.0        bit_1.1-14           tidyselect_0.2.5    
+ [88] plyr_1.8.4           magrittr_1.5         R6_2.4.0            
+ [91] IRanges_2.18.1       gplots_3.0.1.1       DBI_1.0.0           
+ [94] withr_2.1.2          pillar_1.4.2         whisker_0.3-2       
+ [97] fitdistrplus_1.0-14  survival_2.44-1.1    RCurl_1.95-4.12     
+[100] tibble_2.1.3         future.apply_1.3.0   tsne_0.1-3          
+[103] crayon_1.3.4         utf8_1.1.4           KernSmooth_2.23-15  
+[106] plotly_4.9.0         rmarkdown_1.13       progress_1.2.2      
+[109] grid_3.6.1           data.table_1.12.2    blob_1.2.0          
+[112] git2r_0.26.1         metap_1.1            digest_0.6.20       
+[115] tidyr_0.8.3          R.utils_2.9.0        stats4_3.6.1        
+[118] munsell_0.5.0        viridisLite_0.3.0   </code></pre>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
