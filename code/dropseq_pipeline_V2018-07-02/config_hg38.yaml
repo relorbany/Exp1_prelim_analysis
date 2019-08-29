@@ -1,0 +1,27 @@
+#Snakemake configuration file
+
+#this file contains the info specific to a snakemake run
+
+#project directory this line needs to be changed from command line
+proj_dir: /project2/gilad/spott/drop_test/
+
+#directory with additional scripts
+scripts: /project2/gilad/spott/Pipelines/dropseq_pipeline/Scripts/
+
+#logfile
+dir_log: log/
+#Genome index for STAR aligner
+genome_index: /project2/gilad/spott/Pipelines/dropseq_pipeline/STAR_indeces/hg38_noalt_juncGencodeV27_61/
+
+
+#transcript file
+txn_file: /project2/gilad/spott/Pipelines/dropseq_pipeline/STAR_indeces/hg38_UCSC/gencode.v27.annotation.no.pseudo.gtf
+ref_flat: /project2/gilad/spott/Pipelines/dropseq_pipeline/STAR_indeces/hg38_UCSC/gencode.v27.no.pseudo.annotation.NameCol.refFlat
+ribosome_intervals: /project2/gilad/spott/Pipelines/dropseq_pipeline/STAR_indeces/hg38_UCSC/hg38_ribosome.interval_list
+#expected number of cells the value is the upper bound, at least 10% of this value will be lower bound so make sure to adjust it
+cell_num: 5000
+# cell barcode UMI Configuration
+barcode: "CCCCCCCCCCCCNNNNNNNN"
+
+#downsampling
+downsample: ["1","0.9","0.8","0.7","0.5", "0.25","0.1"]

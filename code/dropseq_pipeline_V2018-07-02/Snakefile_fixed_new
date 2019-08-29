@@ -1,0 +1,309 @@
+#Snakefile for Dropseq analysis based on a fixed (i.e. not automatically inferred) number of cells
+
+import glob
+import os
+
+# Configuration ----------------------------------------------------------------
+#these things should go to the config file
+#configfile: "config.yaml"
+
+#Scripts
+scripts = config["scripts"]
+#expected number of cells (upper limit)
+cell_num = config["cell_num"]
+
+#cell barcode UMI structure
+barcode = config["barcode"]
+
+#genome_index
+GenomeIndex = config["genome_index"]
+#gene file
+txn_file = config["txn_file"]
+ref_flat = config["ref_flat"]
+ribosome_int = config["ribosome_intervals"]
+
+pd = config["proj_dir"]
+data = pd + "data/"
+output = pd + "output/"
+fastq_dir = data + "fastq/"
+fastqc_dir = output + "fastqc/"
+fastq_extr = data + "fastq_extr/"
+cell_stats = data + "cell_stats/"
+aligned = data + "aligned/"
+sorted_gene_reads = data + "sorted_gene_reads/"
+downsampled = data + "downsampled/"
+assigned_genes = data + "assigned_genes/"
+CB_UMI_tags = data + "CB_UMI_tags/"
+dge_data = output + "dge_data/"
+qc_data = output + "qc_data/"
+code = "Code/"
+
+
+
+#make sure the project directory actually exists
+#assert os.path.exists(pd), "Project directory exists"
+
+# Directory to send log files. Needs to be created manually since it
+# is not a file created by a Snakemake rule.
+dir_log = config["dir_log"]
+if not os.path.isdir(dir_log):
+    os.mkdir(dir_log)
+# input data # might need to be changed to be universal
+
+samples = set(glob_wildcards(fastq_dir + "{samples}_R1_001.fastq.gz").samples)
+percent = config["downsample"]
+
+rule all:
+    input:
+        cell_stats + "whitelist.txt",
+        expand(fastq_extr + "{sample}_r1_extracted.fastq.gz", sample = samples),
+        expand(fastq_extr + "{sample}_r2_extracted_polyA_adaptor_trimmed.fastq.gz", sample = samples),
+        expand(aligned + "{sample}_Aligned_SortedByCoordinate_out.bam", sample = samples),
+        expand(sorted_gene_reads + "{sample}_assigned_sorted.bam", sample = samples),
+        expand(sorted_gene_reads + "{sample}_assigned_sorted.bam.bai", sample = samples),
+        expand(CB_UMI_tags + "{sample}_assigned_sorted_CB_UMI_tags.bam", sample = samples),
+        expand(dge_data + "{sample}_gene_counts.tsv.gz", sample = samples),
+        expand(fastqc_dir + "{sample}_R1_001_fastqc.zip", sample = samples),
+        expand(assigned_genes +  "{sample}_Aligned_SortedByCoordinate_out.bam.featureCounts.bam", sample = samples),
+        expand(assigned_genes + "{sample}_gene_assigned.summary", sample = samples),
+        expand(qc_data + "{sample}_Nucleotide_frequency_in_UMIs.pdf", sample = samples),
+        expand(qc_data + "{sample}_Nucleotide_frequency_in_cell_barcode.pdf", sample = samples),
+        expand(qc_data + "{sample}_CB_UMI_plot.pdf", sample = samples),
+        expand(qc_data + "{sample}_CB_UMI_df.txt", sample = samples),
+        expand(qc_data + "{sample}_UMIs_per_cell.pdf", sample = samples),
+        expand(qc_data + "{sample}_detected_genes_per_cell.pdf", sample = samples),
+        expand(qc_data + "{sample}_mean_UMI_per_gene_vs_detection_rate.pdf", sample = samples),
+        expand(qc_data + "{sample}_Read_distribution_across_genomic_features.pdf", sample = samples),
+        expand(qc_data + "{sample}_RNAmetrics.picard.txt", sample = samples),
+        expand(qc_data + "{sample}_alignment_summaries.txt", sample = samples),
+        #include downsampling files
+        expand(downsampled + "downsampled_{id}.bam", id = percent),
+        expand(downsampled + "downsampled_{id}.bam.bai", id = percent),
+        expand(downsampled + "gene_counts_{id}_downsampled.tsv.gz", id = percent)
+
+
+#fastqc will be run on both input files
+rule fastqc:
+    input:
+        fastq_dir + "{sample}_R{read_num}_001.fastq.gz"
+    output:
+        fastqc_dir + "{sample}_R{read_num}_001_fastqc.html",
+        fastqc_dir + "{sample}_R{read_num}_001_fastqc.zip"
+    params:
+        outdir = fastqc_dir
+    shell:
+        "fastqc -o {params.outdir} {input}"
+
+rule unzip:
+    input:
+        fastqc_dir + "{sample}_R1_001_fastqc.zip"
+    output:
+        fastqc_dir + "{sample}_R1_001_fastqc/fastqc_data.txt"
+    params:
+        outdir = fastqc_dir
+    shell:
+        "unzip -d {params.outdir} {input}"
+
+rule barcode_qc:
+    input:
+        fastqc_dir + "{sample}_R1_001_fastqc/fastqc_data.txt"
+    output:
+        UMI = qc_data + "{sample}_Nucleotide_frequency_in_UMIs.pdf",
+        CB = qc_data + "{sample}_Nucleotide_frequency_in_cell_barcode.pdf"
+    shell:
+        "{scripts}Calculate-nuc-freq.sh {input} {output.CB} {output.UMI}"
+
+rule umi_create_whitelist:
+    input:
+        expand(fastq_dir + "{sample}_R1_001.fastq.gz", sample = samples)
+    output:
+        cell_stats + "whitelist.txt"
+    params:
+        cell_num = cell_num,
+        bc = barcode
+    shell:
+        "umi_tools whitelist --stdin {input} --bc-pattern={params.bc} --set-cell-number={params.cell_num} --extract-method=string --log2stderr > {output}"
+
+rule umi_extract_bc_and_umi:
+    input:
+        r1 = fastq_dir + "{sample}_R1_001.fastq.gz",
+        r2 = fastq_dir + "{sample}_R2_001.fastq.gz",
+        wl = cell_stats + "whitelist.txt"
+    output:
+        r1_ext = temp(fastq_extr + "{sample}_r1_extracted.fastq.gz"),
+        r2_ext = fastq_extr + "{sample}_r2_extracted.fastq.gz"
+    params:
+        bc = barcode
+    shell:
+        "umi_tools extract --bc-pattern={params.bc} --stdin {input.r1} --stdout {output.r1_ext} --read2-in {input.r2} --read2-out={output.r2_ext}  --error-correct-cell --filter-cell-barcode --whitelist={input.wl}"
+
+
+#allows for proportion of 0.1 mismatches (e.g. 10*0.1=1 mismatch in 10bp adaptor match, bp below zero are rounded to 0)
+# sequences to match are poly at the 3 prime end (at least 6) and TSO oligo on the 5 prime end
+rule trim_read2:
+    input:
+        r1 = fastq_extr + "{sample}_r2_extracted.fastq.gz"
+    output:
+        r1_trim = fastq_extr + "{sample}_r2_extracted_polyA_adaptor_trimmed.fastq.gz"
+    params:
+        min_len = 30
+    shell:
+        "cutadapt --minimum-length {params.min_len} -a AAAAAA -g AAGCAGTGGTATCAACGCAGAGTGAATGGG -o {output} {input}"
+
+#alignment with STAR using defaults
+rule align:
+    input:
+        fq = fastq_extr + "{sample}_r2_extracted_polyA_adaptor_trimmed.fastq.gz",
+        ref_genome = GenomeIndex
+    output:
+        aligned + "{sample}_Aligned_SortedByCoordinate_out.bam"
+    threads: 4
+    shell:
+        "STAR --runThreadN {threads} --genomeDir {input.ref_genome} --readFilesIn {input.fq} --readFilesCommand zcat --outFilterMultimapNmax 1 --outSAMtype BAM SortedByCoordinate --outStd BAM_SortedByCoordinate --outFileNamePrefix ./data/aligned/Star_align_stats > {output}"
+
+# assign reads to genes
+# this rule specifically selects gene_id as meta feature to count reads
+rule reads_to_genes:
+    input:
+        bam = aligned + "{sample}_Aligned_SortedByCoordinate_out.bam",
+        features = txn_file
+    output:
+        assigned_feat = assigned_genes + "{sample}_gene_assigned.summary",
+        bam_counts = assigned_genes + "{sample}_Aligned_SortedByCoordinate_out.bam.featureCounts.bam"
+    params:
+        feature = "gene_id",
+    threads: 4
+    shell:
+        """
+        featureCounts -a {input.features} -o {output.assigned_feat} -g {params.feature} -R BAM {input.bam} -T {threads}
+        """
+
+rule sort_gene_bams:
+    input:
+        assigned_genes + "{sample}_Aligned_SortedByCoordinate_out.bam.featureCounts.bam"
+    output:
+        sorted_gene_reads + "{sample}_assigned_sorted.bam"
+    shell:
+        "samtools sort -o {output} -O bam {input}"
+
+rule index_gene_bams:
+    input:
+        sorted_gene_reads + "{sample}_assigned_sorted.bam"
+    output:
+        sorted_gene_reads + "{sample}_assigned_sorted.bam.bai"
+    shell:
+        "samtools index {input}"
+
+rule make_gene_DGE_matrix:
+    input:
+        sorted_gene_reads + "{sample}_assigned_sorted.bam",
+        sorted_gene_reads + "{sample}_assigned_sorted.bam.bai"
+    output:
+        dge_data + "{sample}_gene_counts.tsv.gz"
+    shell:
+        "umi_tools count --wide-format-cell-counts --per-gene --gene-tag=XT --per-cell -I {input} -S {output}"
+
+
+rule gene_detection_qc:
+    input:
+        dge_data + "{sample}_gene_counts.tsv.gz"
+    output:
+        plot1 = qc_data + "{sample}_UMIs_per_cell.pdf",
+        plot2 = qc_data + "{sample}_detected_genes_per_cell.pdf",
+        plot3 = qc_data + "{sample}_mean_UMI_per_gene_vs_detection_rate.pdf"
+    shell:
+        "Rscript --vanilla {scripts}nGene_nUMI_per_cell.R -f {input} -U {output.plot1} -G {output.plot2} -M {output.plot3}"
+
+#prepare CB and UMI summary stats
+rule add_CB_UMI_tags:
+    input:
+        inbam = sorted_gene_reads + "{sample}_assigned_sorted.bam",
+        inbai = sorted_gene_reads + "{sample}_assigned_sorted.bam.bai"
+    output:
+        CB_UMI_tags + "{sample}_assigned_sorted_CB_UMI_tags.bam"
+    shell:
+        "python {scripts}prepare-bam-for-demuxlet.py {input.inbam} {output}"
+
+rule index_CB_UMI_bams:
+    input:
+        CB_UMI_tags + "{sample}_assigned_sorted_CB_UMI_tags.bam"
+    output:
+        CB_UMI_tags + "{sample}_assigned_sorted_CB_UMI_tags.bam.bai"
+    shell:
+        "samtools index {input}"
+
+rule get_CB_UMI_summary:
+    input:
+        inbam = CB_UMI_tags + "{sample}_assigned_sorted_CB_UMI_tags.bam",
+        inbai = CB_UMI_tags + "{sample}_assigned_sorted_CB_UMI_tags.bam.bai"
+    output:
+        out_file = qc_data + "{sample}_CB_UMI_df.txt",
+        out_plot = qc_data + "{sample}_CB_UMI_plot.pdf"
+    shell:
+        "python {scripts}Count-reads-umi-per-cell.py {input.inbam} {output}"
+
+
+
+#saturation analyses
+rule downsample:
+    input:
+        inbam = expand(sorted_gene_reads +  "{sample}_assigned_sorted.bam", sample = samples),
+        inbai = expand(sorted_gene_reads +  "{sample}_assigned_sorted.bam.bai", sample = samples)
+    output:
+        downsampled  + "downsampled_{id}.bam",
+    shell:
+        "samtools view -s {wildcards.id} -b {input.inbam} > {output}"
+
+rule index_downsample:
+    input:
+        downsampled  + "downsampled_{id}.bam"
+    output:
+        downsampled  + "downsampled_{id}.bam.bai"
+    shell:
+        "samtools index {input}"
+
+rule make_downsampled_gene_DGE_matrix:
+    input:
+        inbam = downsampled + "downsampled_{id}.bam",
+        inbai = downsampled + "downsampled_{id}.bam.bai"
+    output:
+        downsampled + "gene_counts_{id}_downsampled.tsv.gz"
+    shell:
+        "umi_tools count --wide-format-cell-counts --per-gene --gene-tag=XT --per-cell -I {input.inbam} -S {output}"
+
+#rule summarize_downsampled:
+
+#get RNA distribution using picard metrics
+rule collect_rna_metrics:
+    input:
+        bam = sorted_gene_reads + "{sample}_assigned_sorted.bam",
+        ref_flat = ref_flat,
+        ribosome_int = ribosome_int
+    output:
+        rna_metrics = qc_data + "{sample}_RNAmetrics.picard.txt"
+    params:
+        strand = "SECOND_READ_TRANSCRIPTION_STRAND",
+        memory = "-Xmx12G"
+    shell:
+        "picard CollectRnaSeqMetrics {params.memory} I={input.bam} O={output.rna_metrics} REF_FLAT={input.ref_flat} STRAND={params.strand} RIBOSOMAL_INTERVALS={input.ribosome_int}"
+
+rule summarize_rna_metrics:
+    input:
+        qc_data + "{sample}_RNAmetrics.picard.txt"
+    output:
+        qc_data + "{sample}_Read_distribution_across_genomic_features.pdf"
+    params:
+        skip_rows = 6
+    shell:
+        "Rscript --vanilla {scripts}summarize-picard-RNA-metrics.R -f {input} -s {params.skip_rows} -o {output}"
+
+rule alignment_summaries:
+    input:
+        fq = fastq_dir + "{sample}_R1_001.fastq.gz",
+        ext = fastq_extr + "{sample}_r2_extracted.fastq.gz",
+        ext_trim = fastq_extr + "{sample}_r2_extracted_polyA_adaptor_trimmed.fastq.gz",
+        aligned = sorted_gene_reads + "{sample}_assigned_sorted.bam"
+    output:
+        qc_data + "{sample}_alignment_summaries.txt"
+    shell:
+        "{scripts}Get-alignment-summaries.sh {input.fq} {input.ext} {input.ext_trim} {input.aligned} {output}"
