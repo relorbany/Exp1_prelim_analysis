@@ -8,4 +8,5 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+Welcome to my research website. Here I'll be publishing my analysis for the single cell cardiomyocyte timecourse data as I collect it.
+Click on this [link](scCM_round1_lowpass_combined.html) to see my preliminary analysis for the shallow sequencing of Round 1 of collections.
