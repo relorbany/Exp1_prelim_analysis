@@ -1,0 +1,681 @@
+---
+title: "scCM_round1_lowpass_combined"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Seurat)
+library(dplyr)
+library(biomaRt)
+library(stringr)
+library(gtools)
+setwd("/project2/gilad/reem/singlecellCM/round1/lowpass/")
+```
+
+My goal is to combine all 18 collections into a single Seurat object. First, I need to read in the raw data for all collections.
+```{r raw data for all col}
+rawdata_C1c1 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col1/output/dge_data/YG-RE1-Drop-CD1col1_S1_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c2 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col2/output/dge_data/YG-RE1-Drop-CD1col2_S2_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c3 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col3/output/dge_data/YG-RE1-Drop-CD1col3_S3_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c4 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col4/output/dge_data/YG-RE2-Drop-CD1col4_S1_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c5 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col5/output/dge_data/YG-RE2-Drop-CD1col5_S2_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C1c6 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD1/CD1col6/output/dge_data/YG-RE2-Drop-CD1col6_S3_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+
+rawdata_C2c1 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col1/output/dge_data/YG-RE1-Drop-CD2col1_S4_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c2 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col2/output/dge_data/YG-RE2-Drop-CD2col2_S4_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c3 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col3/output/dge_data/YG-RE2-Drop-CD2col3_S5_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c4 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col4/output/dge_data/YG-RE1-Drop-CD2col4_S5_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c5 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col5/output/dge_data/YG-RE2-Drop-CD2col5_S6_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C2c6 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD2/CD2col6/output/dge_data/YG-RE1-Drop-CD2col6_S6_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+
+rawdata_C3c1 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col1/output/dge_data/YG-RE2-Drop-CD3col1_S7_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c2 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col2/output/dge_data/YG-RE2-Drop-CD3col2_S8_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c3 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col3/output/dge_data/YG-RE1-Drop-CD3col3_S7_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c4 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col4/output/dge_data/YG-RE1-Drop-CD3col4_S8_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c5 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col5/output/dge_data/YG-RE1-Drop-CD3col5_S9_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+rawdata_C3c6 <- read.table("/project2/gilad/reem/singlecellCM/round1/lowpass/CD3/CD3col6/output/dge_data/YG-RE2-Drop-CD3col6_S9_gene_counts.tsv.gz",header=T, stringsAsFactors = F, row.names=1)
+
+```
+
+Next, I convert Ensembl gene numbers to gene names/symbols to make it more readable. To do that, first I need to get the matched Ensembl IDs and gene symbols through biomart.
+
+```{r get gene names to every dataset}
+
+# get data from biomart
+ensembl = useEnsembl(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+geneinfo <- getBM(attributes = c("ensembl_gene_id","hgnc_symbol"),mart=ensembl)
+
+for (i in 1:3) {
+  for (j in 1:6) {
+    # read in every raw data matrix
+    raw_dat_temp <- eval(as.name(paste0("rawdata_C",i,"c",j)))
+    
+    # remove the version numbers from those gene IDs 
+    gene_id_temp <-
+           str_replace(rownames(raw_dat_temp),
+                       pattern = ".[0-9]+$", replacement="")
+    # and subset to only those genes from the full list of genes
+    mygeneinfo_temp <- geneinfo[geneinfo$ensembl_gene_id %in% gene_id_temp,]
+   
+    # make a temporary raw data matrix with the non-version gene IDs
+    bm_rawdat_temp <- raw_dat_temp
+    rownames(bm_rawdat_temp) <- gene_id_temp
+    # subset temp raw data matrix to only the ones with info on biomart
+    bm_rawdat_temp <- bm_rawdat_temp[rownames(bm_rawdat_temp) %in% mygeneinfo_temp$ensembl_gene_id,]
+    
+    # get all the index numbers for a gene list sorted by number
+mygeneinfo_idsort_temp <- order(mygeneinfo_temp$ensembl_gene_id,decreasing=F)
+    # and sort the genes with those index numbers
+    mygeneinfo_sort_temp <- mygeneinfo_temp[mygeneinfo_idsort_temp,]
+   
+    # get rid of duplicate ensembl IDs
+    mygeneinfo_s_uni_temp <- mygeneinfo_sort_temp[order(mygeneinfo_sort_temp$ensembl_gene_id)[!duplicated(mygeneinfo_sort_temp$ensembl_gene_id)],]
+
+    # deal with duplicate gene name/symbols (mostly ""s) by identifying the duplicates and then creating a new gene name for them that is genesymbol.ensemblID
+dupl_temp <- unique(mygeneinfo_s_uni_temp$hgnc_symbol[duplicated(mygeneinfo_s_uni_temp$hgnc_symbol)])
+for (k in dupl_temp)
+{
+  rows_temp <- which(mygeneinfo_s_uni_temp$hgnc_symbol==k)
+  for (m in 1:length(rows_temp))
+  {
+    mygeneinfo_s_uni_temp$hgnc_symbol[rows_temp[m]] <- paste(mygeneinfo_s_uni_temp$hgnc_symbol[rows_temp[m]], '.', mygeneinfo_s_uni_temp$ensembl_gene_id[rows_temp[m]],sep='')
+  }
+}
+
+# make a gene info matrix with the now unique gene symbols
+mygeneinfo_gsym_temp <- mygeneinfo_s_uni_temp[order(mygeneinfo_s_uni_temp$hgnc_symbol)[!duplicated(mygeneinfo_s_uni_temp$hgnc_symbol)],]
+
+# add those new gene names/symbols as rownames in the raw data matrix
+rownames(bm_rawdat_temp) <- mygeneinfo_s_uni_temp$hgnc_symbol
+    
+# output the raw data matrix with the proper collection name
+assign(paste0("bm_rawdat_C",i,"c",j),bm_rawdat_temp)
+  
+  }
+}
+
+# remove all those temp variables so it doesn't clutter my env
+rm(i,j,k,m,rows_temp,mygeneinfo_gsym_temp,mygeneinfo_idsort_temp,mygeneinfo_sort_temp,mygeneinfo_s_uni_temp,mygeneinfo_temp,gene_id_temp,raw_dat_temp,dupl_temp,bm_rawdat_temp)
+
+```
+
+
+Now let's create the individual Seurat objects for each collection. I do this first so I can assign individual and diffday labels more easily, before merging and subsetting the object.
+```{r create individual seurat objects}
+
+for(i in 1:3){
+  for(j in 1:6){
+    
+    bmrawdat_temp <- eval(as.name(paste0("bm_rawdat_C",i,"c",j)))
+    
+    SObject_temp <-
+      CreateSeuratObject(bmrawdat_temp, min.cells=3, min.features=200,project=paste0("CD",i,"col",j))
+
+    assign(paste0("CD",i,"col",j,"SObj"),SObject_temp)
+    
+  }
+}
+
+rm(list=ls(pattern="bm_rawdat"))
+rm(bmrawdat_temp,SObject_temp,i,j)
+
+# these are Seurat objects for each collection with gene symbols!
+# filtered by only genes in at least 3 cells and only cells with at least 200 genes
+
+
+```
+
+The next step is assigning labels for "individual" and "diffday" to each cell barcode. I do this using the results from demuxlet, which was run previously on the data from each collection.
+```{r demux for the combined object}
+
+for (i in 1:3){
+  for (j in 1:6){
+    
+    SObject <- eval(as.name(paste0("CD",i,"col",j,"SObj")))
+    
+    demux_temp <- read.table(paste0("/project2/gilad/reem/singlecellCM/round1/lowpass/CD",i,"/CD",i,"col",j,"/demux/CD",i,"col",j,"_demux.best"),header=T,stringsAsFactors=F)
+    
+    #demux_temp <- demux_temp[-1,]
+    
+    m <- match(rownames(SObject@meta.data),demux_temp$BARCODE)
+    if(any(is.na(m))) cat(paste0("Not all barcodes are in demuxlet data. Something is wrong in CD",i,"col",j,"!\n"))
+    
+    demux_temp <- demux_temp[m,]
+    
+    demux_temp$individual <- "doublet"
+    demux_temp$individual[which(demux_temp$BEST=="SNG-NA19093")] <- "NA19093"
+    demux_temp$individual[which(demux_temp$BEST=="SNG-NA18912")] <- "NA18912"
+    demux_temp$individual[which(demux_temp$BEST=="SNG-NA18858")] <- "NA18858"
+    demux_temp$individual[which(demux_temp$BEST=="SNG-NA18520")] <- "NA18520"
+    demux_temp$individual[which(demux_temp$BEST=="SNG-NA18511")] <- "NA18511"
+    demux_temp$individual[which(demux_temp$BEST=="SNG-NA18508")] <- "NA18508"
+    
+    tmp_ind <- demux_temp$individual
+    names(tmp_ind) <- demux_temp$BARCODE
+    
+    demux_temp$diffday <- "NA"
+    
+    # col 1 for all CDs
+    if(j == 1){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 3"
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 1"
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 11"
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 5"
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 15"
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 11"
+        # add day 0 col1 here
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 0"
+      }
+    }
+    
+    # col 2 for all CDs
+    if(j == 2){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 3"
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 1"
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 11"
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 5"
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 15"
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 11"
+        ## add day 0 col 2
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 0"
+      }
+    }
+    
+    # col 3 for all CDs
+    if(j == 3){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 3"
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 1"
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 11"
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 5"
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 15"
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 11"
+        # add day 0 col 3
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 0"
+        }
+    }
+    
+    # col 4 for all CDs
+    if(j == 4){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 3"
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 1"
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 11"
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 5"
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual=="NA18520")] <- "Day 15"
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 11"
+        # add day 0 col 4
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 0"
+        }
+    }
+    
+    # col 5 for all CDs
+    if(j == 5){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 3"
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 1"
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 11"
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 5"
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual=="NA18508")] <- "Day 15"
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 11"
+        # add day 0 col 5
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 0"
+        }
+    }
+    
+    # col 6 for all CDs
+    if(j == 6){
+      if(i == 1){
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 3"
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 1"
+      } else if(i == 2){
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 11"
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 7"
+        demux_temp$diffday[which(demux_temp$individual=="NA18912")] <- "Day 5"
+      } else if(i == 3){
+        demux_temp$diffday[which(demux_temp$individual=="NA18511")] <- "Day 15"
+        demux_temp$diffday[which(demux_temp$individual=="NA18858")] <- "Day 11"
+        # add day 0 col 6
+        demux_temp$diffday[which(demux_temp$individual=="NA19093")] <- "Day 0"
+        }
+    }
+    
+    tmp_dday <- demux_temp$diffday
+    names(tmp_dday) <- demux_temp$BARCODE
+    
+    SObject <- AddMetaData(SObject, tmp_ind, col.name = "individual")
+    SObject <- AddMetaData(SObject, tmp_dday, col.name = "diffday")
+    
+    assign(paste0("CD",i,"col",j,"_lbld"),SObject)
+  }
+}
+
+rm(i,j,m,tmp_dday,tmp_ind,SObject,demux_temp)
+rm(list=ls(pattern="SObj"))
+
+# this is a mess lol but i'm leaving it until I need to find a better way
+
+# if we want to explore the data, can do:
+# table(CD1col1_lbld$individual)
+# table(CD1col1_lbld$diffday)
+
+```
+
+For CD1col1, number of cells:
+19093 Day 7 = 1021
+18912 Day 3 = 816
+18520 Day 1 = 936
+For CD1col2, number of cells:
+18858 Day 7 = 751
+18520 Day 3 = 1011
+18508 Day 1 = 286
+For CD1col3, number of cells:
+18912 Day 7 = 739
+18508 Day 3 = 986
+18511 Day 1 = 1523
+For CD1col4, number of cells:
+18520 Day 7 = 308
+18511 Day 3 = 437
+19093 Day 1 = 2177
+For CD1col5, number of cells:
+18508 Day 7 = 674
+19093 Day 3 = 869
+18858 Day 1 = 1237
+For CD1col6, number of cells:
+18511 Day 7 = 306
+18858 Day 3 = 519
+18912 Day 1 = 440
+
+For CD2col1, number of cells:
+19093 Day 11 = 603
+18912 Day 7 = 335
+18520 Day 5 = 734
+sooo many doublets...(1622)
+For CD2col2, number of cells:
+18858 Day 11 = 318
+18520 Day 7 = 517
+18508 Day 5 = 427
+For CD2col3, number of cells:
+18912 Day 11 = 477
+18508 Day 7 = 205
+18511 Day 5 = 604
+For CD2col4, number of cells:
+18520 Day 11 = 603
+18511 Day 7 = 888
+19093 Day 5 = 619
+For CD2col5, number of cells:
+18508 Day 11 = 479
+19093 Day 7 = 506
+18858 Day 5 = 344
+For CD2col6, number of cells:
+18511 Day 11 = 362
+18858 Day 7 = 734
+18912 Day 5 = 730
+
+For CD3col1, number of cells:
+19093 Day 15 = 531
+18912 Day 11 = 453
+18858 Day 0 = 794
+For CD3col2, number of cells:
+18858 Day 15 = 456
+18520 Day 11 = 391
+18912 Day 0  = 1682
+For CD3col3, number of cells:
+18912 Day 15 = 474
+18508 Day 11 = 528
+18520 Day 0 = 297
+tons of doublets...(1455)
+For CD3col4, number of cells:
+18520 Day 15 = 523
+18511 Day 11 = 320
+18508 Day 0 = 1529
+For CD3col5, number of cells:
+18508 Day 15 = 468
+19093 Day 11 = 442
+18511 Day 0 = 2059
+lots of doublets...(1270)
+For CD3col6, number of cells:
+18511 Day 15 = 329
+18858 Day 11 = 399
+19093 Day 0 = 681
+
+Now that I've added metadata tags for "individual" and "diffday" for each collection, I can combine data all collections into a single Seurat object. I will subset to remove all cells that were labeled doublets, or cells that had the wrong individual label given the collection (which I check separately).
+
+```{r merge all Seurat objects and subset out useless cells}
+
+# merge AFTER giving them individual and diffday labels
+
+all_cols_S <- merge(CD1col1_lbld,y=c(CD1col2_lbld,CD1col3_lbld,CD1col4_lbld,CD1col5_lbld,CD1col6_lbld,CD2col1_lbld,CD2col2_lbld,CD2col3_lbld,CD2col4_lbld,CD2col5_lbld,CD2col6_lbld,CD3col1_lbld,CD3col2_lbld,CD3col3_lbld,CD3col4_lbld,CD3col5_lbld,CD3col6_lbld), add.cell.ids = c("CD1col1","CD1col2","CD1col3","CD1col4","CD1col5","CD1col6","CD2col1","CD2col2","CD2col3","CD2col4","CD2col5","CD2col6","CD3col1","CD3col2","CD3col3","CD3col4","CD3col5","CD3col6"), project="CMdiff_round1_lowpass")
+
+# it worked!
+# this object has 21277 features across 46581 samples
+
+table(all_cols_S$orig.ident)
+# a range of cell nos per col from 1334 in C2c2 to 4255 in C3c5
+
+# now i want to subset so only the cells with an individual and a diffday are being used (i.e. no mislabeled individuals on each collection and no doublets)
+Idents(all_cols_S) <- "diffday"
+# make diffday the relevant identity marker
+table(Idents(all_cols_S))
+# a range of cell nos per diffday from 2881 in D15 to 7042 in D0
+
+all_cols_noNA_S = subset(all_cols_S, idents = c("Day 1","Day 3","Day 5","Day 7","Day 11","Day 15","Day 0"))
+
+# now this object has 21277 features across 36977 samples
+# there should be no doublets or mis-IDed cells here
+
+# finally, i'll remove the individual Seurat objects for each col
+rm(list=ls(pattern="lbld"))
+# and the raw data which i shouldn't need anymore
+rm(list=ls(pattern="rawdata"))
+
+```
+
+I will make a "sample" label in the metadata tag, which has the combined individual and diffday information in the form: NAInd.Day#
+
+```{r make a sample label}
+
+# let's make a column that's a combo of individual and diffday
+all_cols_noNA_S$sample <- "IND.DAY"
+
+all_cols_noNA_S$sample <- paste0(all_cols_noNA_S$individual,".",all_cols_noNA_S$diffday)
+
+# i will also add metadata info for percent mitochondrial genes
+all_cols_noNA_S[["percent.mito"]] <- PercentageFeatureSet(all_cols_noNA_S, pattern="^MT-")
+
+
+```
+
+We now have a large Seurat object with all data from the 18 collections, excluding doublets and incorrectly labeled cells. Each has a metadata tag relating the individual and diffday of the sample.
+
+* Remember: Every day 7 and day 11 actually has two collections!
+
+From here, I will start making plots to visualize some basic QC metrics in the data. But first, I'd like to order the sample names in a more intuitive way for visualization.
+
+```{r level order for samples}
+
+# first, let's order the levels in a more intuitive way
+# for diffday
+mydaylevels <- c("Day 0","Day 1","Day 3","Day 5","Day 7","Day 11","Day 15")
+all_cols_noNA_S@meta.data$diffday <- factor(x=all_cols_noNA_S@meta.data$diffday, levels=mydaylevels)
+# for individual
+myindlevels <- c("NA19093","NA18858","NA18912","NA18520","NA18508","NA18511")
+all_cols_noNA_S@meta.data$individual <- factor(x=all_cols_noNA_S@meta.data$individual, levels=myindlevels)
+# for sample
+mysamplelevels <- as.character(all_cols_noNA_S$sample)
+mysamplelevels <- mixedsort(mysamplelevels, decreasing = F)
+mysamplelevels <- unique(mysamplelevels)
+all_cols_noNA_S@meta.data$sample <- factor(x=all_cols_noNA_S@meta.data$sample, levels=mysamplelevels)
+
+```
+
+I'll start by analyzing the distribution of gene counts per cell (nFeature_RNA), read counts per cell (nCount_RNA), and percent mitochondrial genes (percent.mito).
+```{r violin and feature scatter plots}
+
+# now for some violin plots to look at gene count, read count, and percent mito genes
+VlnPlot(all_cols_noNA_S, features=c("nFeature_RNA","nCount_RNA","percent.mito"),ncol=3, group.by = "individual",pt.size = 0)
+# hmmm maybe.
+# dots are overwhelming so i made point size = 0 to get rid of them
+VlnPlot(all_cols_noNA_S, features=c("nFeature_RNA","nCount_RNA","percent.mito"),ncol=3, group.by = "diffday")
+
+# now vlnplot again but group by sample
+VlnPlot(all_cols_noNA_S, features="nFeature_RNA", group.by = "sample", pt.size=0)
+VlnPlot(all_cols_noNA_S, features="nCount_RNA", group.by = "sample", pt.size=0)
+VlnPlot(all_cols_noNA_S, features="percent.mito", group.by = "sample", pt.size=0)
+# can see an effect by collection day, expected
+
+# we can look at this by individual too
+Idents(all_cols_noNA_S) <- "individual"
+VlnPlot(all_cols_noNA_S, features="percent.mito", group.by = "sample", pt.size=0.2, idents= "NA19093")
+
+# or by diff day for all individuals
+Idents(all_cols_noNA_S) <- "diffday"
+VlnPlot(all_cols_noNA_S, features="nFeature_RNA", group.by = "sample", pt.size=0.2, idents= "Day 7")
+
+
+# finally, let's look at some feature scatter plots
+FeatureScatter(all_cols_noNA_S,feature1="nCount_RNA",feature2 = "percent.mito",group.by = "sample")
+FeatureScatter(all_cols_noNA_S,feature1="nCount_RNA",feature2 = "nFeature_RNA",group.by = "sample")
+
+## FOR THE FUTURE!!!
+# can I do a statistical test here to see if the difference in gene counts or percent mito between individuals or diff days is significant?
+
+```
+
+We can use what we found from the previous plots to filter the data by quality. When we made the Seurat objects, we applied the following filters: only include genes expressed in at least 3 cells, and only include cells with at least 200 genes. Now, we can subject further for percent mitochondrial genes, for example. We can also log normalize the data.
+
+```{r filter, normalize}
+
+all_cols_filter_S <- subset(all_cols_noNA_S, subset = percent.mito < 30)
+# now have 32361 cells total (4600ish fewer than before)
+all_cols_filter_S <- NormalizeData(all_cols_filter_S)
+# default is log normalize
+
+```
+
+Using our newly filtered and normalized data, we can perform feature selection to identify the most variable genes in the combined dataset. I can do this for all samples (all individuals at all diffdays from all coldays), but I would also like to do it only between the same individual at different days, only between the same diffday for different individuals, etc.
+
+```{r feature selection}
+
+# identifying the top 2000 variable genes between all cells (all individuals, all diffdays)
+all_cols_filter_S <- FindVariableFeatures(all_cols_filter_S, selection.method = "vst", nfeatures=2000)
+
+top25genes<- head(VariableFeatures(all_cols_filter_S),25)
+# top 25 genes with the highest variability between cells include:
+# PLEKHH2, AFP, NPPA, NPPB, ENSG00000254584, TNFSF13B, ACTA1, APOA2, FGB, TTR, SERPINA1, APOA1, MYL7, S100A14, EMC10, ANKRD1, ACTC1, CER1, SLITRK5, DKK4, SYT14, CGA, TNNT2, CSRP3, HS3ST1
+
+plot_varfeats <- VariableFeaturePlot(all_cols_filter_S)
+plot_varfeatslbld <- LabelPoints(plot=plot_varfeats,points=top25genes,repel=T)
+plot_varfeatslbld
+
+# PLEKHH2 is the top by far... it's in the lung and uterus? and kidney maybe? involved in actin stabilization and can recruit TFGb.
+
+#### QUESTION FOR FURTHER CONSIDERATION!!!!!
+# is there a way to do this for a subset of cells? like only one individual at all days? without subsetting the whole Seurat object?
+
+```
+
+Maybe the only way to do variable feature selection on a subset of our samples is to subset the Seurat object first, and then do feature selection on that new object.
+```{r subset to only an individual for feature selection}
+
+Idents(all_cols_filter_S) <- "individual"
+subset_19093 <- subset(all_cols_filter_S, idents = "NA19093")
+subset_19093 <- FindVariableFeatures(subset_19093, selection.method = "vst", nfeatures=2000)
+
+top25genes_19093 <- head(VariableFeatures(subset_19093),25)
+# a similar list to the full dataset with PLEKHH2 on top
+
+plot_varfeats_19093 <- VariableFeaturePlot(subset_19093)
+plot_varfeatslbld_19093 <- LabelPoints(plot=plot_varfeats_19093,points=top25genes_19093,repel=T)
+plot_varfeatslbld_19093
+
+# and for a different individual
+
+Idents(all_cols_filter_S) <- "individual"
+subset_18520 <- subset(all_cols_filter_S, idents = "NA18520")
+subset_18520 <- FindVariableFeatures(subset_18520, selection.method = "vst", nfeatures=2000)
+
+top25genes_18520 <- head(VariableFeatures(subset_18520),25)
+# a similar list to the full dataset but with EMC10 on top and TNNT2 way higher on the list...
+
+plot_varfeats_18520 <- VariableFeaturePlot(subset_18520)
+plot_varfeatslbld_18520 <- LabelPoints(plot=plot_varfeats_18520,points=top25genes_18520,repel=T)
+plot_varfeatslbld_18520
+
+# and one more
+
+subset_18511 <- subset(all_cols_filter_S, idents = "NA18511")
+subset_18511 <- FindVariableFeatures(subset_18511, selection.method = "vst", nfeatures=2000)
+
+top25genes_18511 <- head(VariableFeatures(subset_18511),25)
+# a similar list to the full dataset with PLEKHH2 on top
+
+plot_varfeats_18511 <- VariableFeaturePlot(subset_18511)
+plot_varfeatslbld_18511 <- LabelPoints(plot=plot_varfeats_18511,points=top25genes_18511,repel=T)
+plot_varfeatslbld_18511
+
+
+```
+
+```{r subset to only a diff day for feature selection}
+
+Idents(all_cols_filter_S) <- "diffday"
+subset_day0 <- subset(all_cols_filter_S, idents = "Day 0")
+subset_day0 <- FindVariableFeatures(subset_day0, selection.method = "vst", nfeatures=2000)
+
+top25genes_day0 <- head(VariableFeatures(subset_day0),25)
+# hmmm
+# i'm getting EMC10 and CARS2 on top, PLEKHH2 a little further. also TNNT2, MYH6, TTN, MYL7, etc.
+# something is wrong here. have some things been mislabeled as day 0 ???
+
+plot_varfeats_day0 <- VariableFeaturePlot(subset_day0)
+plot_varfeatslbld_day0 <- LabelPoints(plot=plot_varfeats_day0,points=top25genes_day0,repel=T)
+plot_varfeatslbld_day0
+
+## now day 15
+subset_day15 <- subset(all_cols_filter_S, idents = "Day 15")
+subset_day15 <- FindVariableFeatures(subset_day15, selection.method = "vst", nfeatures=2000)
+
+top25genes_day15 <- head(VariableFeatures(subset_day15),25)
+# heart stuff for the most part (NPPA, NPPB, MYL7, etc)
+# the top one is AFP
+
+plot_varfeats_day15 <- VariableFeaturePlot(subset_day15)
+plot_varfeatslbld_day15 <- LabelPoints(plot=plot_varfeats_day15,points=top25genes_day15,repel=T)
+plot_varfeatslbld_day15
+
+# now day 3
+subset_day3 <- subset(all_cols_filter_S, idents = "Day 3")
+subset_day3 <- FindVariableFeatures(subset_day3, selection.method = "vst", nfeatures=2000)
+
+top25genes_day3 <- head(VariableFeatures(subset_day3),25)
+# top gene is PLEKHH2 but the rest aren't really heart related
+# DKK4, CARS2, GAL, HIST1H1D, CXCL14, etc
+
+plot_varfeats_day3 <- VariableFeaturePlot(subset_day3)
+plot_varfeatslbld_day3 <- LabelPoints(plot=plot_varfeats_day3,points=top25genes_day3,repel=T)
+plot_varfeatslbld_day3
+
+```
+
+
+Next, we scale the data and perform linear dimensionality reduction using PCA. We can visualize the loadings for top PCs on a PCA plot or using a heatmap with only the most extreme cells included (for speed). We can also create an elbow plot to help us visualize how many PCs to consider using for downstream analysis.
+
+```{r pca}
+
+all.genes_com <- rownames(all_cols_filter_S)
+all_cols_scaled_S <- ScaleData(all_cols_filter_S, features=all.genes_com)
+
+all_cols_scaled_S <- RunPCA(all_cols_scaled_S, features= VariableFeatures(all_cols_scaled_S))
+print(all_cols_scaled_S[["pca"]],dims=1:5,nfeatures=5)
+# for PC1, top positive is MALAT1, TNNT2, TPM1, MYL7, TNNI1
+# PC1 top negative is L1TD1, DPPA4, TDGF1, ESRG, EPCAM
+# for PC2, top positive is TNNT2, EMC10, NEXN, MYH6, ACTC1
+# PC2 top negative is MIXL1, LINC01356, LINC00458, PTMA, TUBB2B
+
+VizDimLoadings(all_cols_scaled_S, dims = 1:2,nfeatures=24, reduction = "pca", balanced=T)
+# 12 genes + and 12 -for PC1 and 2
+VizDimLoadings(all_cols_scaled_S, dims = 1:2,nfeatures=30, reduction = "pca", balanced=F)
+# this is unbalanced between + and -
+
+# By diffday, you can see a gradient along both PC1 and PC2
+DimPlot(all_cols_scaled_S,reduction="pca",group.by = "diffday", label=T, repel=T, label.size = 5)
+# By individual, you don't see much of an effect along PCs 1 and 2
+DimPlot(all_cols_scaled_S,reduction="pca",group.by = "individual", label=T, repel=T, label.size = 5)
+
+
+DimHeatmap(all_cols_scaled_S, dims=1, cells=500, balanced = T)
+# heatmap just for top 500 cells on PC1
+DimHeatmap(all_cols_scaled_S, dims=1:15, cells=500, balanced = T)
+# PCs 1 through 15
+
+ElbowPlot(all_cols_scaled_S)
+# to see how many PCs to use for further analysis
+
+```
+
+Here, we will find nearest neighbors and identify clusters in our combined dataset. We can perform nonlinear dimensionality reduction and visualize the data with a UMAP plot, colored/labeled by UMAP-identified clusters or by our sample labels. We can also identify marker genes that are most characteristic of each cluster.
+
+```{r clustering}
+
+all_cols_scaled_S <- FindNeighbors(all_cols_scaled_S, dims=1:10)
+all_cols_scaled_S <- FindClusters(all_cols_scaled_S, resolution=0.5)
+head(Idents(all_cols_scaled_S),5)
+
+all_cols_scaled_S <- RunUMAP(all_cols_scaled_S, dims=1:10)
+# to make this work i need to module unload python then module load python/3.5.2 in midway2
+DimPlot(all_cols_scaled_S, reduction="umap", label=T, repel=T, label.size = 5)
+DimPlot(all_cols_scaled_S, reduction="umap",group.by = "sample", label=T, repel=T, label.size = 5)
+# i think it doesn't want to label by sample because there are too many????
+DimPlot(all_cols_scaled_S, reduction="umap",group.by = "diffday", label=T, repel=T, label.size = 5)
+# by diffday a nice gradient, by individual mostly a mess
+
+
+cluster1markers_c <- FindMarkers(all_cols_scaled_S, ident.1 = 1, min.pct = 0.25)
+head(cluster1markers_c,n=5)
+# 
+
+cluster.day7.markers <- FindMarkers(all_cols_scaled_S, ident.1= "Day 7",group.by="diffday",min.cells.feature = 0.25)
+head(cluster.day7.markers,n=10)
+# 
+
+##cluster19093markers <- FindMarkers(C1c1S_genesym_sub, ident.1 = "NA19093", group.by = "individual",logfc.threshold = 0.25, test.use = "roc",only.pos = T)
+# can do this test roc to see classification power of each gene
+
+cluster.markers_c <- FindAllMarkers(all_cols_scaled_S, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
+#can't figure out a way to do this for cell line vs all other cells, so for now it's just every Seurat identified cluster vs all other cells
+cluster.markers_c %>% group_by(cluster) %>% top_n(n=2,wt=avg_logFC)
+# 
+# i guess this is the top two for every cluster?
+
+cluster.markers_c %>% group_by("diffday") %>% top_n(n=5,wt=avg_logFC)
+# by diffday, top 5 markers are 
+
+cluster.markers_c %>% group_by("individual") %>% top_n(n=5,wt=avg_logFC)
+# 
+
+```
+
+If we want a closer look at the difference in gene expression between samples for specific genes of interest, we can visualize those using violin plots for each gene of interest. We can also recreate our UMAP plot, with shading corresponding to gene expression of various marker genes of interest.
+
+```{r gene by gene for combined}
+
+
+VlnPlot(all_cols_scaled_S, features="TNNT2",group.by = "sample")
+# etc for any gene you want
+# this looks p different normalized or not btw
+
+Idents(all_cols_scaled_S) <- "individual"
+VlnPlot(all_cols_scaled_S, features="TNNT2",group.by = "sample", pt.size = 0.2, idents="NA18520")
+
+# for some reason TNNT2 and MYL7 are being expressed in Day 0? in at least 18520 and 19093
+# the big plot says this is mostly a thing in TNNT2 for 18511 nd 18520
+# i'll have to think more about why this might be
+
+FeaturePlot(all_cols_scaled_S,features=c("POU5F1","SOX2","EPCAM","EOMES", "MIXL1","HAND1","TNNT2","MYL7","MYH6"))
+
+```
